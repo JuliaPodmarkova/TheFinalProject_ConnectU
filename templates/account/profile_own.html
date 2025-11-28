@@ -1,0 +1,65 @@
+<!-- templates/account/profile_own.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+
+            <!-- ============================================== -->
+            <!-- НАДЕЖНЫЙ БЛОК ДЛЯ ОТОБРАЖЕНИЯ СООБЩЕНИЙ -->
+            <!-- ============================================== -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            <!-- КОНЕЦ БЛОКА СООБЩЕНИЙ -->
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Мой профиль</h4>
+                    <a href="{% url 'profile_edit' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-pencil-alt me-1"></i> Редактировать
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            {% if profile.avatar %}
+                                <img src="{{ profile.avatar.url }}" alt="Фото {{ profile.full_name }}" class="img-fluid rounded-circle mb-3" style="width: 200px; height: 200px; object-fit: cover;">
+                            {% else %}
+                                <img src="{% static 'images/default_avatar.png' %}" alt="Нет фото" class="img-fluid rounded-circle mb-3" style="width: 200px; height: 200px; object-fit: cover;">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h3>{{ profile.full_name }}, {{ profile.age }}</h3>
+                            <p class="text-muted"><i class="fas fa-map-marker-alt me-2"></i>{{ profile.city }}</p>
+                            <hr>
+                            {% if profile.bio %}
+                                <p><strong>О себе:</strong></p>
+                                <p>{{ profile.bio }}</p>
+                            {% endif %}
+
+                            {% if profile.interests.all %}
+                                <p class="mt-4"><strong><i class="fas fa-heart me-2"></i>Интересы:</strong></p>
+                                <p>
+                                    {% for interest in profile.interests.all %}
+                                        <span class="badge bg-primary fs-6 me-1 mb-1">{{ interest.name }}</span>
+                                    {% endfor %}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- Мы полностью убрали блок extra_js с модальным окном отсюда -->

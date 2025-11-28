@@ -1,0 +1,99 @@
+<!-- templates/profile.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Главное фото -->
+            <!-- ИСПРАВЛЕНИЕ 1: Правильный способ получить первое фото -->
+            {% with main_photo=profile_user.photos.all.first %}
+                {% if main_photo %}
+                    <img src="{{ main_photo.image.url }}" class="img-fluid rounded shadow-sm" alt="Фото профиля {{ profile_user.profile.full_name }}">
+                {% else %}
+                    <img src="{% static 'images/placeholder.png' %}" class="img-fluid rounded shadow-sm" alt="Нет фото">
+                {% endif %}
+            {% endwith %}
+
+            <!-- Кнопки действий -->
+            <div class="d-grid gap-2 mt-3">
+                {% if is_own_profile %}
+                    <!-- ИСПРАВЛЕНИЕ 2: Заменяем # на правильные URL -->
+                    <a href="{% url 'profile_edit' %}" class="btn btn-primary">✏️ Редактировать профиль</a>
+                    <a href="{% url 'settings' %}" class="btn btn-secondary">⚙️ Настройки</a>
+                {% else %}
+                    <!-- Эти кнопки пока оставим как заглушки -->
+                    <button class="btn btn-success">❤️ Лайк</button>
+                    <button class="btn btn-danger">👎 Дизлайк</button>
+                    <button class="btn btn-info">💬 Написать сообщение</button>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <!-- Основная информация -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <!-- ИСПРАВЛЕНИЕ 3: Используем метод get_age из профиля -->
+                    <h2 class="card-title">{{ profile_user.profile.full_name }}, {{ profile_user.profile.get_age }}</h2>
+                    <h5 class="card-subtitle mb-2 text-muted">{{ profile_user.profile.city|default:"Город не указан" }}</h5>
+                    <p class="badge bg-success fs-6">{{ profile_user.profile.get_status_display }}</p>
+
+                    <hr>
+
+                    <h4>Увлечения:</h4>
+                    <p>{{ profile_user.profile.hobbies|default:"Информация не указана" }}</p>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-start">
+                        <div class="me-4">
+                            <span class="fs-4">❤️ {{ profile_user.profile.likes_count }}</span>
+                            <small class="text-muted d-block">Лайков</small>
+                        </div>
+                        <div>
+                            <span class="fs-4">📷 {{ profile_user.photos.count }}</span>
+                            <small class="text-muted d-block">Фото</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Галерея -->
+            <h3 class="mt-4">Фотогалерея</h3>
+            <hr>
+            <div class="row row-cols-2 row-cols-lg-4 g-3">
+                {% for photo in profile_user.photos.all %}
+                <div class="col">
+                    <a href="{{ photo.image.url }}" data-bs-toggle="modal" data-bs-target="#photoModal-{{ photo.id }}">
+                        <img src="{{ photo.image.url }}" class="img-fluid rounded" alt="Фото">
+                    </a>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <p>У пользователя пока нет фотографий.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальные окна для просмотра фото -->
+{% for photo in profile_user.photos.all %}
+<div class="modal fade" id="photoModal-{{ photo.id }}" tabindex="-1" aria-labelledby="photoModalLabel-{{ photo.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="photoModalLabel-{{ photo.id }}">{{ profile_user.profile.full_name }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+            <img src="{{ photo.image.url }}" class="img-fluid" alt="Фото">
+        </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

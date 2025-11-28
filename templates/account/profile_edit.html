@@ -1,0 +1,133 @@
+<!-- templates/account/profile_edit.html -->
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0">Редактирование профиля</h4>
+                </div>
+                <div class="card-body">
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Отображаем общие ошибки форм -->
+                        {% if user_form.non_field_errors or profile_form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ user_form.non_field_errors }}
+                            {{ profile_form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <!-- --- Поля UserEditForm --- -->
+                        <div class="mb-3">
+                            <label for="{{ user_form.email.id_for_label }}" class="form-label">Email</label>
+                            {% render_field user_form.email class+="form-control" %}
+                            {% if user_form.email.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ user_form.email.errors.as_text }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- --- Поля UserProfileEditForm --- -->
+                        <div class="mb-3">
+                            <label for="{{ profile_form.full_name.id_for_label }}" class="form-label">Полное имя</label>
+                            {% render_field profile_form.full_name class+="form-control" %}
+                             {% if profile_form.full_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ profile_form.full_name.errors.as_text }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ profile_form.city.id_for_label }}" class="form-label">Город</label>
+                            {% render_field profile_form.city class+="form-control" %}
+                            {% if profile_form.city.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ profile_form.city.errors.as_text }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ profile_form.bio.id_for_label }}" class="form-label">О себе</label>
+                            {% render_field profile_form.bio class+="form-control" rows="3" %}
+                            {% if profile_form.bio.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ profile_form.bio.errors.as_text }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ profile_form.avatar.id_for_label }}" class="form-label">Фото профиля</label>
+                            {% render_field profile_form.avatar class+="form-control" %}
+                            {% if profile_form.avatar.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ profile_form.avatar.errors.as_text }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- --- БЛОК С ИНТЕРЕСАМИ (ЕДИНСТВЕННЫЙ И ПРАВИЛЬНЫЙ) --- -->
+                        <div class="mb-3">
+                            <label class="form-label">Интересы</label>
+                            <div class="border rounded p-3 {% if profile_form.interests.errors %}is-invalid{% endif %}">
+                                <div class="row">
+                                    <!-- Проходимся в цикле по каждому отдельному чекбоксу -->
+                                    {% for checkbox in profile_form.interests %}
+                                    <div class="col-md-4 col-sm-6"> <!-- Располагаем по 3 в ряд на средних экранах, по 2 на малых -->
+                                        <div class="form-check">
+                                            <!-- Выводим сам чекбокс -->
+                                            {{ checkbox.tag }}
+                                            <!-- Выводим его название (label) -->
+                                            <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                                {{ checkbox.choice_label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <!-- Блок для вывода общей ошибки для этого поля -->
+                            {% if profile_form.interests.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ profile_form.interests.errors.as_text }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                             <label for="{{ profile_form.other_interests.id_for_label }}" class="form-label">Другие интересы (через запятую)</label>
+                             {% render_field profile_form.other_interests class+="form-control" %}
+                             <div class="form-text">Например: Йога, Путешествия, Программирование</div>
+                             {% if profile_form.other_interests.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ profile_form.other_interests.errors.as_text }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <hr>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Сохранить изменения</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,202 @@
+:root {
+    --primary-color: #4A96FF;
+    --accent-color: #FF6B6B;
+    --background-color: #F5F7FA;
+    --text-color: #2D3436;
+    --card-bg: #FFFFFF;
+    --font-header: 'Montserrat', sans-serif;
+    --font-body: 'Open Sans', sans-serif;
+}
+
+body {
+    background-color: var(--background-color);
+    font-family: var(--font-body);
+    color: var(--text-color);
+    margin: 0;
+    padding-top: 70px; /* Высота шапки */
+}
+
+/* --- ШАПКА --- */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5%;
+    background-color: var(--card-bg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    height: 70px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.logo {
+    font-family: var(--font-header);
+    font-weight: 700;
+    font-size: 24px;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-left: auto; /* Двигаем ссылки в центр */
+    margin-right: 30px;
+}
+
+.nav-item {
+    text-decoration: none;
+    color: var(--text-color);
+    font-size: 16px;
+    font-weight: 600;
+    padding: 10px 0;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.nav-item:hover, .nav-item.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.user-block {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+}
+
+.user-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.user-name { font-weight: 600; }
+.user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+
+.user-dropdown {
+    display: none;
+    position: absolute;
+    top: 110%;
+    right: 0;
+    background: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    min-width: 160px;
+    overflow: hidden;
+}
+
+.user-block:hover .user-dropdown { display: block; }
+.user-dropdown a {
+    display: block;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: background-color 0.2s;
+}
+.user-dropdown a:hover { background-color: #f0f0f0; }
+
+/* --- КНОПКИ --- */
+.btn-primary, .btn-secondary {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s ease;
+}
+
+.btn-primary { background-color: var(--accent-color); color: white; }
+.btn-primary:hover { background-color: #e65c5c; }
+.btn-secondary { background-color: #e0e0e0; color: var(--text-color); }
+.btn-secondary:hover { background-color: #d0d0d0; }
+
+/* --- ОСНОВНОЙ КОНТЕНТ И ЛЕНТА --- */
+.main-content { padding: 40px 20px; }
+.feed-container { max-width: 340px; margin: 0 auto; }
+
+.profile-card {
+    width: 340px;
+    height: 520px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    position: relative;
+    background: var(--card-bg);
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+}
+
+.profile-card.active { transform: scale(1); opacity: 1; }
+/* ... (остальные стили для карточки, кнопок и т.д.) ... */
+
+/* --- МОДАЛЬНОЕ ОКНО ФИЛЬТРОВ --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.modal-overlay.visible { opacity: 1; visibility: visible; }
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    transform: scale(0.9);
+    transition: transform 0.3s;
+}
+
+.modal-overlay.visible .modal-content { transform: scale(1); }
+.modal-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #aaa;
+}
+/* ... (стили для формы внутри модалки) ... */
+
+/* --- СТРАНИЦЫ ВХОДА/РЕГИСТРАЦИИ --- */
+.auth-container { display: flex; justify-content: center; align-items: center; padding-top: 50px; }
+.auth-card {
+    background: var(--card-bg);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+.auth-card h2 { font-family: var(--font-header); margin-top: 0; }
+.auth-card .form-group { text-align: left; }
+.auth-card button { width: 100%; margin-top: 10px; padding: 12px; }
+.auth-switch { margin-top: 20px; font-size: 14px; }
+.error-message { color: var(--accent-color); margin-top: 15px; font-weight: 600; min-height: 20px; }

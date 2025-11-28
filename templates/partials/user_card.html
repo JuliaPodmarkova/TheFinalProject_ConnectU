@@ -1,0 +1,60 @@
+{% load static %}
+{% if recommended_user %}
+<div class="card shadow-sm mb-4">
+    <!-- ИСПРАВЛЕНО: Добавлена проверка на наличие аватара -->
+    {% if recommended_user.profile.avatar %}
+        <img src="{{ recommended_user.profile.avatar.url }}" class="card-img-top" alt="Фото {{ recommended_user.profile.full_name }}" style="height: 500px; object-fit: cover;">
+    {% else %}
+        <!-- Если аватара нет, показываем картинку-заглушку -->
+        <img src="{% static 'images/default_avatar.png' %}" class="card-img-top" alt="Нет фото" style="height: 500px; object-fit: cover;">
+        <!-- Убедись, что у тебя есть файл /static/images/default_avatar.png -->
+    {% endif %}
+
+    <div class="card-body">
+        <h4 class="card-title">{{ recommended_user.profile.full_name }}, {{ recommended_user.profile.age }}</h4>
+        <p class="card-text text-muted">
+            <i class="fas fa-map-marker-alt me-1"></i> {{ recommended_user.profile.city }} <br>
+            {% if recommended_user.profile.interests.all %}
+            <i class="fas fa-heart me-1"></i> Интересы:
+            {% for interest in recommended_user.profile.interests.all %}
+                {{ interest.name }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Кнопки с магией HTMX (здесь всё было правильно!) -->
+    <div class="card-footer bg-white p-3">
+        <div class="d-flex justify-content-around">
+            <button
+                class="btn btn-outline-danger btn-lg rounded-circle" style="width: 70px; height: 70px;"
+                hx-post="{% url 'dislike_user' recommended_user.id %}"
+                hx-target="#user-card-container"
+                hx-swap="innerHTML"
+            >
+                <i class="fas fa-times fa-2x"></i>
+            </button>
+
+            <button class="btn btn-outline-info btn-lg rounded-circle" style="width: 70px; height: 70px;">
+                <i class="fas fa-comment-dots fa-2x"></i>
+            </button>
+
+            <button
+                class="btn btn-outline-success btn-lg rounded-circle" style="width: 70px; height: 70px;"
+                hx-post="{% url 'like_user' recommended_user.id %}"
+                hx-target="#user-card-container"
+                hx-swap="innerHTML"
+            >
+                <i class="fas fa-heart fa-2x"></i>
+            </button>
+        </div>
+    </div>
+</div>
+{% else %}
+<!-- Если подходящих пользователей не найдено -->
+<div class="text-center p-5">
+    <i class="fas fa-users-slash fa-4x text-muted mb-3"></i>
+    <h4 class="text-muted">Новых анкет пока нет</h4>
+    <p class="text-muted">Загляните позже, мы обязательно подберем для вас кого-нибудь!</p>
+</div>
+{% endif %}

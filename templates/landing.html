@@ -1,0 +1,13 @@
+<!-- templates/landing.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center mt-5">Добро пожаловать в ConnectU!</h1>
+    <p class="text-center">Найди свою пару уже сегодня.</p>
+    <div class="text-center">
+        <a href="{% url 'login' %}" class="btn btn-primary">Войти</a>
+        <a href="{% url 'signup' %}" class="btn btn-secondary">Зарегистрироваться</a>
+    </div>
+</div>
+{% endblock %}

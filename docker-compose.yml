@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file: .env
+    ports:
+      - "5435:5432"
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  app:
+    build: .
+    command: >
+      sh -c "./wait-for-it.sh db 5432 &&
+             echo 'Postgres is up - starting migration' &&
+             python manage.py migrate &&
+             echo 'Migration finished - starting daphne' &&
+             daphne -b 0.0.0.0 -p 8001 connect_u.asgi:application"
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/mediafiles
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db
+      - redis
+    env_file: .env
+
+  nginx:
+    build: ./nginx
+    restart: unless-stopped
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/mediafiles
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:

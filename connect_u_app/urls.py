@@ -11,4 +11,6 @@ urlpatterns = [
     path('logout/', auth_views.logout_view, name='logout'),
     path('signup/', auth_views.register_view, name='register'),
     path('next/', interactions.show_next_user_view, name='show_next_user'),
+    path('accounts/login/', RedirectView.as_view(url='/login/', permanent=False)),
+    path('accounts/logout/', RedirectView.as_view(url='/logout/', permanent=False)),
 ]

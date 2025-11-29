@@ -5,8 +5,8 @@ Django
 django-cors-headers
 django-filter
 djangorestframework
-drf-nested-routers
 djangorestframework-simplejwt
+drf-nested-routers
 djoser
 drf-spectacular
 Faker

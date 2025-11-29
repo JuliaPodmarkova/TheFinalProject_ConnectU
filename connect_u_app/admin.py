@@ -1,5 +1,3 @@
-# connect_u_app/admin.py
-
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import User, UserProfile, Photo, Interest, Interaction, Match, ChatMessage
@@ -21,19 +19,18 @@ class InterestAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 class InteractionAdmin(admin.ModelAdmin):
-    list_display = ('from_user', 'to_user', 'reaction', 'created_at')
+    list_display = ('from_user', 'to_user', 'reaction')
     list_filter = ('reaction',)
     search_fields = ('from_user__email', 'to_user__email')
 
 class MatchAdmin(admin.ModelAdmin):
-    list_display = ('user1', 'user2', 'created_at')
+    list_display = ('user1', 'user2', 'timestamp')
     search_fields = ('user1__email', 'user2__email')
 
 class ChatMessageAdmin(admin.ModelAdmin):
     list_display = ('match', 'sender', 'timestamp')
     list_filter = ('match',)
 
-# Регистрируем все наши модели
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(Photo, PhotoAdmin)

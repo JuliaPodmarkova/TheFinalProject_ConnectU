@@ -1,5 +1,3 @@
-# connect_u_app/views/auth_views.py
-
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
@@ -9,9 +7,6 @@ from ..forms import UserRegistrationForm
 
 
 def login_view(request):
-    """
-    Обрабатывает вход пользователя.
-    """
     if request.user.is_authenticated:
         return redirect('home')
 

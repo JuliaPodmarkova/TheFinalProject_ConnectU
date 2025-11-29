@@ -1,5 +1,3 @@
-# connect_u_app/models.py
-
 from datetime import date
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager, User
@@ -9,24 +7,13 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-# ==============================================================================
-# МЕНЕДЖЕРЫ МОДЕЛЕЙ
-# ==============================================================================
-
 class CustomUserManager(BaseUserManager):
-    """
-    Кастомный менеджер моделей пользователей, где email является уникальным идентификатором
-    для аутентификации вместо usernames.
-    """
+
     def create_user(self, email, password, **extra_fields):
-        """
-        Создает и сохраняет пользователя с заданным email и паролем.
-        """
+
         if not email:
             raise ValueError(_('The Email must be set'))
         email = self.normalize_email(email)
-        # В стандартной модели User поле username все еще существует и должно быть уникальным.
-        # Мы можем просто приравнять его к email.
         username = email
         user = self.model(username=username, email=email, **extra_fields)
         user.set_password(password)
@@ -34,9 +21,7 @@ class CustomUserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password, **extra_fields):
-        """
-        Создает и сохраняет суперпользователя с заданным email и паролем.
-        """
+
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
@@ -46,10 +31,6 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError(_('Superuser must have is_superuser=True.'))
         return self.create_user(email, password, **extra_fields)
-
-# ==============================================================================
-# ОСНОВНЫЕ МОДЕЛИ
-# ==============================================================================
 
 class User(AbstractUser):
     GENDER_CHOICES = (
@@ -116,10 +97,6 @@ class Photo(models.Model):
     is_main = models.BooleanField(default=False)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
-# ==============================================================================
-# МОДЕЛИ ВЗАИМОДЕЙСТВИЙ
-# ==============================================================================
-
 class Like(models.Model):
     from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes_given')
     to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes_received')
@@ -149,38 +126,17 @@ class Interaction(models.Model):
     reaction = models.CharField(max_length=10, choices=REACTION_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
 
-class Match(models.Model):
-    user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='matches1')
-    user2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='matches2')
-    created_at = models.DateTimeField(auto_now_add=True)
-
-class ChatMessage(models.Model):
-    match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='messages')
-    sender = models.ForeignKey(User, on_delete=models.CASCADE)
-    content = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-# ==============================================================================
-# СИГНАЛЫ
-# ==============================================================================
-
 @receiver(post_save, sender=User)
 def create_or_update_user_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance, full_name=f"{instance.first_name} {instance.last_name}".strip())
     else:
-        # Убедимся, что профиль существует, прежде чем сохранять
         if hasattr(instance, 'profile'):
             instance.profile.save()
         else:
-            # Если профиля почему-то нет (маловероятно), создаем его
             UserProfile.objects.create(user=instance)
 
-
 class Match(models.Model):
-    """ Модель для хранения взаимных лайков (мэтчей) """
-    # Используем related_name, чтобы Django не путался,
-    # так как у нас два поля ссылаются на одну и ту же модель User.
     user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='matches_as_user1')
     user2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='matches_as_user2')
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
@@ -188,22 +144,23 @@ class Match(models.Model):
     class Meta:
         verbose_name = "Мэтч"
         verbose_name_plural = "Мэтчи"
-        # Уникальность пары пользователей, чтобы не было дублей (Вася-Маша и Маша-Вася)
         unique_together = ('user1', 'user2')
 
     def __str__(self):
         return f"Мэтч между {self.user1.username} и {self.user2.username}"
 
     def save(self, *args, **kwargs):
-        # Гарантируем, что user1.id всегда меньше user2.id,
-        # чтобы избежать дубликатов вида (user1, user2) и (user2, user1).
-        # Это защищает от ошибок на уровне приложения.
         if self.user1.id > self.user2.id:
             self.user1, self.user2 = self.user2, self.user1
         super(Match, self).save(*args, **kwargs)
 
+class ChatMessage(models.Model):
+    match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='chat_messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
 class Message(models.Model):
-    """ Модель для хранения сообщений в чате """
     match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='messages', verbose_name="Мэтч")
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages', verbose_name="Отправитель")
     content = models.TextField(verbose_name="Содержание")
@@ -213,7 +170,7 @@ class Message(models.Model):
     class Meta:
         verbose_name = "Сообщение"
         verbose_name_plural = "Сообщения"
-        ordering = ['timestamp'] # Сортируем сообщения по времени отправки
+        ordering = ['timestamp']
 
     def __str__(self):
         return f"Сообщение от {self.sender.username} в {self.timestamp.strftime('%Y-%m-%d %H:%M')}"

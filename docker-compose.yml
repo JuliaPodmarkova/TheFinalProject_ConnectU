@@ -29,6 +29,8 @@ services:
       - db
       - redis
     env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: connect_u.settings
 
   nginx:
     build: ./nginx

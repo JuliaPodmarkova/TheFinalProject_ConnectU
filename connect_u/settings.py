@@ -14,26 +14,16 @@ from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
 
-# Загружаем переменные окружения из .env файла
 load_dotenv()
-
-# --- Основные настройки ---
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ВАЖНО: Никогда не оставляйте секретный ключ в коде!
-# Он загружается из переменной окружения.
 SECRET_KEY = os.environ['SECRET_KEY']
 
-# ВАЖНО: Отключите DEBUG в продакшене!
-# '1' -> True, '0' -> False. По умолчанию False.
 DEBUG = os.environ.get('DEBUG', '0') == '1'
 
-# Хосты, которым разрешено обслуживать сайт.
-# В .env хранится как 'localhost,127.0.0.1,yourdomain.com'
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
-# --- Приложения ---
 INSTALLED_APPS = [
     # ASGI сервер для WebSockets
     'daphne',
@@ -90,14 +80,10 @@ TEMPLATES = [
     },
 ]
 
-# --- ASGI & WSGI ---
-# Для синхронных запросов (стандартный HTTP)
+
 WSGI_APPLICATION = 'connect_u.wsgi.application'
-# Для асинхронных запросов (WebSockets)
 ASGI_APPLICATION = 'connect_u.asgi.application'
 
-# --- База данных ---
-# Все данные для подключения берутся из .env файла
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -109,10 +95,8 @@ DATABASES = {
     }
 }
 
-# --- Наша модель пользователя ---
 AUTH_USER_MODEL = 'connect_u_app.User'
 
-# --- Валидаторы паролей ---
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -120,25 +104,19 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# --- Интернационализация ---
 LANGUAGE_CODE = 'ru-ru'
 TIME_ZONE = 'Europe/Moscow'
 USE_I18N = True
 USE_TZ = True
 
-# --- Статические файлы и медиа ---
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'mediafiles'
 
-# --- PK для моделей ---
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# --- Настройки сторонних библиотек ---
-
-# Django REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -150,14 +128,12 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 
-# Simple JWT (токены)
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': True,
 }
 
-# Djoser (регистрация, авторизация)
 DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
     'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
@@ -170,7 +146,6 @@ DJOSER = {
     'LOGIN_FIELD': 'email',
 }
 
-# Channels (WebSockets)
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
@@ -180,18 +155,14 @@ CHANNEL_LAYERS = {
     },
 }
 
-# CORS Headers (разрешение кросс-доменных запросов)
-
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
-    # При работе с приложением в продакшн
     # CORS_ALLOWED_ORIGINS = [
     #     "https://your-frontend-domain.com" (поменять на свой домен),
     # ]
     pass
 
-# drf-spectacular (Swagger/OpenAPI)
 SPECTACULAR_SETTINGS = {
     'TITLE': 'ConnectU API',
     'DESCRIPTION': 'API для платформы знакомств и общения ConnectU',
@@ -206,14 +177,11 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-# Настройки для Djoser для интеграции с social-auth
 DJOSER = {
-    # ... (остальные настройки Djoser)
     'SOCIAL_AUTH_TOKEN_STRATEGY': 'djoser.social.token.jwt.TokenStrategy',
     'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS': ['http://localhost/google', 'http://localhost/facebook'],
 }
 
-# Ключи нужно будет получить в Google/Facebook Developer Console
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', '')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET', '')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['email', 'profile']
@@ -222,13 +190,11 @@ SOCIAL_AUTH_FACEBOOK_KEY = os.environ.get('SOCIAL_AUTH_FACEBOOK_KEY', '')
 SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('SOCIAL_AUTH_FACEBOOK_SECRET', '')
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
-
-# Блок настроек для Jazzmin
 JAZZMIN_SETTINGS = {
     "site_title": "ConnectU Admin",
     "site_header": "ConnectU",
     "site_brand": "ConnectU",
-    "site_logo": None, # Можно добавить путь к логотипу, например 'assets/logo.png'
+    "site_logo": None,
     "login_logo": None,
     "welcome_sign": "Добро пожаловать в панель управления ConnectU",
     "copyright": "ConnectU Ltd.",
@@ -255,17 +221,16 @@ JAZZMIN_SETTINGS = {
     "related_modal_active": True,
     "custom_css": None,
     "custom_js": None,
-    "show_ui_builder": False, # Установить в True, чтобы настраивать цвета прямо в админке
+    "show_ui_builder": False,
     "changeform_format": "horizontal_tabs",
     "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
-    # Цвета из вашей концепции дизайна
     "ui_tweaks": {
         "navbar_small_text": False,
         "footer_small_text": False,
         "body_small_text": False,
         "brand_small_text": False,
-        "brand_colour": "navbar-dark", # #2D3436 (темно-серый)
-        "accent": "accent-primary", # #4A96FF (нежно-голубой)
+        "brand_colour": "navbar-dark",
+        "accent": "accent-primary",
         "navbar": "navbar-dark",
         "no_navbar_border": False,
         "navbar_fixed": True,

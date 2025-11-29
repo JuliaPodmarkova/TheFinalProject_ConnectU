@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import pages, interactions, auth_views
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path('', pages.index, name='home'),

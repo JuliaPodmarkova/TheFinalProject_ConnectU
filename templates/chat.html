@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .chat-container {
+        max-width: 800px;
+        margin: auto;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        height: 75vh;
+    }
+    .chat-header {
+        padding: 1rem;
+        border-bottom: 1px solid #ddd;
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+    .chat-messages {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+    }
+    .message {
+        max-width: 70%;
+        padding: 0.5rem 1rem;
+        border-radius: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    .message.sent {
+        background-color: #0d6efd;
+        color: white;
+        align-self: flex-end;
+        border-bottom-right-radius: 0;
+    }
+    .message.received {
+        background-color: #e9ecef;
+        color: black;
+        align-self: flex-start;
+        border-bottom-left-radius: 0;
+    }
+    .chat-form {
+        padding: 1rem;
+        border-top: 1px solid #ddd;
+    }
+</style>
+
+<div class="chat-container">
+    <div class="chat-header">
+        Чат с {{ other_user.profile.full_name }}
+    </div>
+
+    <div class="chat-messages" id="chat-messages">
+        {% for message in messages %}
+            <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %}">
+                {{ message.content|linebreaksbr }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="chat-form">
+        <form method="post" class="d-flex">
+            {% csrf_token %}
+            <textarea name="content" class="form-control me-2" rows="2" placeholder="Напишите сообщение..." required></textarea>
+            <button type="submit" class="btn btn-primary">Отправить</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Автоматически прокручиваем чат до последнего сообщения
+    const chatMessages = document.getElementById('chat-messages');
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+</script>
+
+{% endblock %}

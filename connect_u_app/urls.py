@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import pages, interactions, auth_views
+from .views import pages, interactions, auth_views,actions
 from django.views.generic.base import RedirectView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView, TokenRefreshView
@@ -26,4 +26,6 @@ urlpatterns = [
     path('accounts/signup/', RedirectView.as_view(url='/signup/', permanent=False)),
     path('api/v1/auth/jwt/create/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/v1/auth/jwt/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('matches/', pages.match_list_view, name='match_list'),
+    path('chat/<int:match_id>/', pages.chat_view, name='chat'),
 ]

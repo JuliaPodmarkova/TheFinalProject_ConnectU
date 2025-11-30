@@ -1,46 +1,31 @@
-from datetime import date
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.db.models import Q, F, CheckConstraint
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.core.files import File
-from django.db.models import Q, UniqueConstraint
 from PIL import Image
 from io import BytesIO
-import os
 
 
-# =========================================================
-# 👇 НАЧАЛО НОВОГО КОДА (ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ) 👇
-# =========================================================
-
-def user_photos_path(instance, filename):
-    # Файлы будут загружаться в MEDIA_ROOT/user_<id>/<filename>
-    return f'user_{instance.user.id}/{filename}'
-
-
-# =========================================================
-# 👆 КОНЕЦ НОВОГО КОДА 👆
-# =========================================================
-
+# --- МЕНЕДЖЕР ДЛЯ ПРОДВИНУТОЙ МОДЕЛИ USER ---
+# Позволяет использовать email как основной логин
 class CustomUserManager(BaseUserManager):
-
     def create_user(self, email, password, **extra_fields):
-
         if not email:
-            raise ValueError(_('The Email must be set'))
+            raise ValueError(_('Поле Email должно быть заполнено'))
         email = self.normalize_email(email)
-        username = email
-        user = self.model(username=username, email=email, **extra_fields)
+        # Устанавливаем username равным email для совместимости
+        extra_fields.setdefault('username', email)
+        user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
     def create_superuser(self, email, password, **extra_fields):
-
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
@@ -52,17 +37,19 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
+# --- ПРОДВИНУТАЯ МОДЕЛЬ USER ---
 class User(AbstractUser):
     GENDER_CHOICES = (
         ('M', 'Мужчина'),
         ('F', 'Женщина'),
     )
     email = models.EmailField(_('email address'), unique=True)
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='F')
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     birth_date = models.DateField(null=True, blank=True)
 
+    # Указываем, что логином теперь будет email
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = []  # email уже обязателен, так что дополнительных полей не требуется
 
     objects = CustomUserManager()
 
@@ -78,74 +65,75 @@ class User(AbstractUser):
         return None
 
 
+# --- МОДЕЛЬ ИНТЕРЕСОВ ---
 class Interest(models.Model):
-    name = models.CharField(max_length=50, unique=True, verbose_name="Название интереса")
+    name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name = "Интерес"
-        verbose_name_plural = "Интересы"
         ordering = ['name']
 
 
+# --- ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ (С ВОЗВРАЩЕННЫМ СТАТУСОМ) ---
 class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
-    full_name = models.CharField(max_length=255, blank=True)
+    full_name = models.CharField(max_length=100, blank=True)
     city = models.CharField(max_length=100, blank=True)
+    bio = models.TextField(blank=True)
+    avatar = models.ImageField(upload_to='avatars/', default='avatars/default.png')
+    interests = models.ManyToManyField(Interest, blank=True)
+    # Возвращаем полезное поле "статус"
     status = models.CharField(
         max_length=20,
         choices=[('searching', 'В поиске'), ('in_relationship', 'В отношениях'), ('not_specified', 'Не указано')],
         default='not_specified'
     )
-    interests = models.ManyToManyField(Interest, blank=True, verbose_name="Интересы")
-    bio = models.TextField(blank=True, null=True, verbose_name="О себе")
-    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True, default='avatars/default.png')
 
     def __str__(self):
-        return self.user.email
+        return self.full_name or self.user.email
 
-    @property
-    def age(self):
-        if self.user.birth_date:
-            today = date.today()
-            return today.year - self.user.birth_date.year - (
-                    (today.month, today.day) < (self.user.birth_date.month, self.user.birth_date.day))
-        return None
+
+# --- ФОТОГРАФИИ (С ГЛАВНЫМ ФОТО И ОПТИМИЗАЦИЕЙ) ---
+def user_photos_path(instance, filename):
+    return f'user_{instance.user.id}/{filename}'
 
 
 class Photo(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='photos')
-    # 👇 ИЗМЕНЕНИЕ 1: Улучшаем путь для загрузки фото 👇
     image = models.ImageField(upload_to=user_photos_path)
+    # Возвращаем полезное поле "главное фото"
     is_main = models.BooleanField(default=False)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
-    # =========================================================
-    # 👇 НАЧАЛО НОВОГО КОДА (ЛОГИКА СЖАТИЯ ФОТО) 👇
-    # =========================================================
+    # Отличная функция для сжатия фото при загрузке
     def save(self, *args, **kwargs):
         if self.image:
             pil_img = Image.open(self.image)
-            max_width, max_height = 800, 800
+            max_width, max_height = 1024, 1024  # Увеличим качество
 
             if pil_img.width > max_width or pil_img.height > max_height:
                 pil_img.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
 
+                # Сохраняем в памяти без изменения исходного файла
                 in_mem_file = BytesIO()
-                img_format = pil_img.format if pil_img.format in ['JPEG', 'PNG'] else 'JPEG'
-                pil_img.save(in_mem_file, format=img_format)
+                # Конвертируем в RGB, чтобы избежать проблем с прозрачностью PNG
+                if pil_img.mode in ("RGBA", "P"):
+                    pil_img = pil_img.convert("RGB")
+                pil_img.save(in_mem_file, format='JPEG', quality=90)
                 in_mem_file.seek(0)
 
-                self.image = File(in_mem_file, name=self.image.name)
+                # Изменяем имя файла на .jpg, если оно было другим
+                original_name, _ = self.image.name.split('.')
+                new_name = f"{original_name}.jpg"
+
+                self.image = File(in_mem_file, name=new_name)
 
         super().save(*args, **kwargs)
-    # =========================================================
-    # 👆 КОНЕЦ НОВОГО КОДА 👆
-    # =========================================================
 
 
+# --- ЛАЙКИ И ДИЗЛАЙКИ (ЕДИНАЯ ВЕРСИЯ) ---
 class Like(models.Model):
     from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes_given')
     to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes_received')
@@ -153,9 +141,6 @@ class Like(models.Model):
 
     class Meta:
         unique_together = ('from_user', 'to_user')
-
-    def __str__(self):
-        return f"{self.from_user} likes {self.to_user}"
 
 
 class Dislike(models.Model):
@@ -166,67 +151,38 @@ class Dislike(models.Model):
     class Meta:
         unique_together = ('from_user', 'to_user')
 
-    def __str__(self):
-        return f"{self.from_user} dislikes {self.to_user}"
 
-
-class Interaction(models.Model):
-    REACTION_CHOICES = [('like', 'Like'), ('dislike', 'Dislike')]
-    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='interactions_from')
-    to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='interactions_to')
-    reaction = models.CharField(max_length=10, choices=REACTION_CHOICES)
+# --- МЭТЧИ И СООБЩЕНИЯ (ИЗ НАШЕЙ НОВОЙ ВЕРСИИ) ---
+class Match(models.Model):
+    user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='matches_user1')
+    user2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='matches_user2')
     created_at = models.DateTimeField(auto_now_add=True)
 
-
-@receiver(post_save, sender=User)
-def create_or_update_user_profile(sender, instance, created, **kwargs):
-    if created:
-        UserProfile.objects.create(user=instance, full_name=f"{instance.first_name} {instance.last_name}".strip())
-    else:
-        if hasattr(instance, 'profile'):
-            instance.profile.save()
-        else:
-            UserProfile.objects.create(user=instance)
-
-
-class Match(models.Model):
-    user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='matches_as_user1')
-    user2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='matches_as_user2')
-    timestamp = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
-
     class Meta:
-        verbose_name = "Мэтч"
-        verbose_name_plural = "Мэтчи"
-        unique_together = ('user1', 'user2')
+        constraints = [
+            models.UniqueConstraint(fields=['user1', 'user2'], name='unique_match'),
+            CheckConstraint(check=~Q(user1=F('user2')), name='users_cannot_be_the_same'),
+        ]
 
     def __str__(self):
-        return f"Мэтч между {self.user1.username} и {self.user2.username}"
-
-    def save(self, *args, **kwargs):
-        # Гарантируем, что user1.id всегда меньше user2.id для простоты поиска
-        if self.user1.id > self.user2.id:
-            self.user1, self.user2 = self.user2, self.user1
-        super(Match, self).save(*args, **kwargs)
-
-
-class ChatMessage(models.Model):
-    match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='chat_messages')
-    sender = models.ForeignKey(User, on_delete=models.CASCADE)
-    content = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True)
+        return f"Match between {self.user1.email} and {self.user2.email}"
 
 
 class Message(models.Model):
-    match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='messages', verbose_name="Мэтч")
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages', verbose_name="Отправитель")
-    content = models.TextField(verbose_name="Содержание")
-    timestamp = models.DateTimeField(auto_now_add=True, verbose_name="Время отправки")
-    is_read = models.BooleanField(default=False, verbose_name="Прочитано")
+    match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = "Сообщение"
-        verbose_name_plural = "Сообщения"
         ordering = ['timestamp']
 
-    def __str__(self):
-        return f"Сообщение от {self.sender.username} в {self.timestamp.strftime('%Y-%m-%d %H:%M')}"
+
+# --- СИГНАЛ ДЛЯ АВТОМАТИЧЕСКОГО СОЗДАНИЯ ПРОФИЛЯ ---
+@receiver(post_save, sender=User)
+def create_or_update_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance, full_name=instance.username)
+    # Убеждаемся, что профиль существует, прежде чем сохранять
+    if hasattr(instance, 'profile'):
+        instance.profile.save()

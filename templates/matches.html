@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Мои мэтчи</h2>
+
+    {% if matches %}
+        <div class="list-group">
+            {% for match in matches %}
+                {% comment %} Определяем, кто в мэтче "другой" пользователь {% endcomment %}
+                {% if request.user == match.user1 %}
+                    {% with other_user=match.user2 %}
+                    <a href="{% url 'chat' match.id %}" class="list-group-item list-group-item-action d-flex align-items-center">
+                        <img src="{{ other_user.profile.avatar.url }}" alt="{{ other_user.profile.full_name }}" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                        <div class="fw-bold">{{ other_user.profile.full_name }}</div>
+                    </a>
+                    {% endwith %}
+                {% else %}
+                    {% with other_user=match.user1 %}
+                    <a href="{% url 'chat' match.id %}" class="list-group-item list-group-item-action d-flex align-items-center">
+                        <img src="{{ other_user.profile.avatar.url }}" alt="{{ other_user.profile.full_name }}" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                        <div class="fw-bold">{{ other_user.profile.full_name }}</div>
+                    </a>
+                    {% endwith %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            У вас пока нет мэтчей. Продолжайте ставить лайки! ❤️
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

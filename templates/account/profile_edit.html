@@ -75,12 +75,11 @@
                                     {% for checkbox in profile_form.interests %}
                                     <div class="col-md-4 col-sm-6">
                                         <div class="form-check">
-                                            <input type="checkbox"
-                                                   name="{{ checkbox.name }}"
-                                                   value="{{ checkbox.value }}"
-                                                   id="{{ checkbox.id_for_label }}"
-                                                   class="form-check-input"
-                                                   {% if checkbox.is_checked %}checked{% endif %}>
+
+                                            <!-- 👇👇👇 ВОТ ИЗМЕНЕНИЕ 👇👇👇 -->
+                                            {{ checkbox.tag }}
+                                            <!-- 👆👆👆 ВМЕСТО ДЛИННОГО <input ...> 👆👆👆 -->
+
                                             <label class="form-check-label" for="{{ checkbox.id_for_label }}">
                                                 {{ checkbox.choice_label }}
                                             </label>

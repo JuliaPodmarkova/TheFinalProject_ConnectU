@@ -4,5 +4,5 @@ FROM nginx:1.21-alpine
 # Удаляем стандартный конфиг, который идет в комплекте с образом
 RUN rm /etc/nginx/conf.d/default.conf
 
-# Копируем наш собственный файл nginx.conf в нужное место внутри контейнера
-COPY nginx.conf /etc/nginx/conf.d/
+# Копируем наш собственный файл defalt.conf в нужное место внутри контейнера
+COPY defalt.conf /etc/nginx/conf.d/

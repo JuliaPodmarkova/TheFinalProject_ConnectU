@@ -4,21 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1587ceec-4b57-4d39-ad89-7d56d9c39185" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/connect_u_app/views/actions.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/chat.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/matches.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/views/pages.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/views/pages.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nginx/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/nginx/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nginx/nginx.conf" beforeDir="false" afterPath="$PROJECT_DIR$/nginx/defalt.conf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/account/profile_edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account/profile_edit.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
-    </list>
+    <list default="true" id="1587ceec-4b57-4d39-ad89-7d56d9c39185" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

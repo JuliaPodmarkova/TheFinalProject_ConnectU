@@ -8,7 +8,6 @@ urlpatterns = [
     path('', include('connect_u_app.urls')),
     path('oauth/', include('social_django.urls', namespace='social')),
     # path('', include('django.contrib.auth.urls')),
-    path('api/v1/auth/', include('rest_framework_simplejwt.urls')),
 ]
 
 if settings.DEBUG:

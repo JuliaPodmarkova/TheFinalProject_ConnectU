@@ -25,4 +25,3 @@ urlpatterns = [
     path('api/v1/auth/jwt/create/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/v1/auth/jwt/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
-]

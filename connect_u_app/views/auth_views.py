@@ -5,7 +5,6 @@ from django.contrib import messages
 from ..models import User
 from ..forms import UserRegistrationForm
 
-
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('home')
@@ -17,7 +16,8 @@ def login_view(request):
             password = form.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
             if user is not None:
-                login(request, user)
+                # Явно указываем backend!
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 return redirect('home')
             else:
                 messages.error(request, "Неверное имя пользователя или пароль.")
@@ -28,41 +28,21 @@ def login_view(request):
 
     return render(request, 'account/login.html', {'form': form})
 
-
 def logout_view(request):
-    """
-    Обрабатывает выход пользователя.
-    """
     logout(request)
     return redirect('home')
 
-
 def register_view(request):
-    """
-    Обрабатывает регистрацию нового пользователя.
-    (Это твоя функция signup_view, переименована для единообразия).
-    """
     if request.user.is_authenticated:
-        return redirect('home')  # Перенаправляем на ленту, если уже вошел
+        return redirect('home')
 
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            # Используем create_user для правильного сохранения пароля
-            new_user = User.objects.create_user(
-                email=form.cleaned_data['email'],
-                password=form.cleaned_data['password'],
-                gender=form.cleaned_data['gender'],
-                birth_date=form.cleaned_data['birth_date']
-            )
-            # Профиль создается автоматически сигналом, мы его просто дополняем
-            new_user.profile.full_name = form.cleaned_data['full_name']
-            new_user.profile.city = form.cleaned_data['city']
-            new_user.profile.save()
-
-            login(request, new_user)
+            new_user = form.save()
+            login(request, new_user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, "Регистрация прошла успешно! Добро пожаловать!")
-            return redirect('home')  # Перенаправляем на ленту после регистрации
+            return redirect('home')
     else:
         form = UserRegistrationForm()
 

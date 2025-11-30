@@ -7,8 +7,9 @@
     <list default="true" id="1587ceec-4b57-4d39-ad89-7d56d9c39185" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/connect_u_app/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/forms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u_app/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/connect_u_app/views/auth_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/views/auth_views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,10 +88,6 @@
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/connect_u_app/serializers.py</url>
           <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/connect_u_app/views/auth_views.py</url>
-          <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load widget_tweaks %}
+
 {% block content %}
 <div class="container mt-5 mb-5">
     <div class="row justify-content-center">
@@ -11,51 +12,62 @@
                 <div class="card-body">
                     <form method="post" enctype="multipart/form-data" novalidate>
                         {% csrf_token %}
-                        
-                        <!-- Блок с полями из UserEditForm -->
+
+                        {% if user_form.non_field_errors or profile_form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ user_form.non_field_errors }}
+                                {{ profile_form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
                         <h5 class="mb-3">Основная информация</h5>
+
                         <div class="mb-3">
                             <label for="{{ user_form.email.id_for_label }}" class="form-label">Email</label>
-                            {% render_field user_form.email class+="form-control" %}
-                            {% if user_form.email.errors %}<div class="invalid-feedback d-block">{{ user_form.email.errors.as_text }}</div>{% endif %}
+                            {% render_field user_form.email class+="form-control" %}{% if user_form.email.errors %}is-invalid{% endif %}
+                            {% if user_form.email.errors %}<div class="invalid-feedback">{{ user_form.email.errors|striptags }}</div>{% endif %}
                         </div>
+
                         <div class="mb-3">
                             <label for="{{ user_form.gender.id_for_label }}" class="form-label">{{ user_form.gender.label }}</label>
-                            {% render_field user_form.gender class+="form-select" %}
-                            {% if user_form.gender.errors %}<div class="invalid-feedback d-block">{{ user_form.gender.errors.as_text }}</div>{% endif %}
+                            {% render_field user_form.gender class+="form-select" %}{% if user_form.gender.errors %}is-invalid{% endif %}
+                            {% if user_form.gender.errors %}<div class="invalid-feedback">{{ user_form.gender.errors|striptags }}</div>{% endif %}
                         </div>
+
                         <div class="mb-3">
                             <label for="{{ user_form.birth_date.id_for_label }}" class="form-label">{{ user_form.birth_date.label }}</label>
-                            {% render_field user_form.birth_date class+="form-control" %}
-                            {% if user_form.birth_date.errors %}<div class="invalid-feedback d-block">{{ user_form.birth_date.errors.as_text }}</div>{% endif %}
+                            {% render_field user_form.birth_date class+="form-control" type="date" %}{% if user_form.birth_date.errors %}is-invalid{% endif %}
+                            {% if user_form.birth_date.errors %}<div class="invalid-feedback">{{ user_form.birth_date.errors|striptags }}</div>{% endif %}
                         </div>
 
                         <hr class="my-4">
 
-                        <!-- Блок с полями из UserProfileEditForm -->
                         <h5 class="mb-3">Детали профиля</h5>
+
                         <div class="mb-3">
                             <label for="{{ profile_form.full_name.id_for_label }}" class="form-label">Полное имя</label>
-                            {% render_field profile_form.full_name class+="form-control" %}
-                            {% if profile_form.full_name.errors %}<div class="invalid-feedback d-block">{{ profile_form.full_name.errors.as_text }}</div>{% endif %}
+                            {% render_field profile_form.full_name class+="form-control" %}{% if profile_form.full_name.errors %}is-invalid{% endif %}
+                            {% if profile_form.full_name.errors %}<div class="invalid-feedback">{{ profile_form.full_name.errors|striptags }}</div>{% endif %}
                         </div>
+
                          <div class="mb-3">
                             <label for="{{ profile_form.city.id_for_label }}" class="form-label">Город</label>
-                            {% render_field profile_form.city class+="form-control" %}
-                            {% if profile_form.city.errors %}<div class="invalid-feedback d-block">{{ profile_form.city.errors.as_text }}</div>{% endif %}
+                            {% render_field profile_form.city class+="form-control" %}{% if profile_form.city.errors %}is-invalid{% endif %}
+                            {% if profile_form.city.errors %}<div class="invalid-feedback">{{ profile_form.city.errors|striptags }}</div>{% endif %}
                         </div>
+
                         <div class="mb-3">
                             <label for="{{ profile_form.bio.id_for_label }}" class="form-label">О себе</label>
-                            {% render_field profile_form.bio class+="form-control" rows="3" %}
-                            {% if profile_form.bio.errors %}<div class="invalid-feedback d-block">{{ profile_form.bio.errors.as_text }}</div>{% endif %}
+                            {% render_field profile_form.bio class+="form-control" rows="3" %}{% if profile_form.bio.errors %}is-invalid{% endif %}
+                            {% if profile_form.bio.errors %}<div class="invalid-feedback">{{ profile_form.bio.errors|striptags }}</div>{% endif %}
                         </div>
+
                         <div class="mb-3">
                             <label for="{{ profile_form.avatar.id_for_label }}" class="form-label">Фото профиля</label>
-                            {% render_field profile_form.avatar class+="form-control" %}
-                            {% if profile_form.avatar.errors %}<div class="invalid-feedback d-block">{{ profile_form.avatar.errors.as_text }}</div>{% endif %}
+                            {% render_field profile_form.avatar class+="form-control" %}{% if profile_form.avatar.errors %}is-invalid{% endif %}
+                            {% if profile_form.avatar.errors %}<div class="invalid-feedback">{{ profile_form.avatar.errors|striptags }}</div>{% endif %}
                         </div>
-                        
-                        <!-- Интересы -->
+
                         <div class="mb-3">
                             <label class="form-label">Интересы</label>
                             <div class="border rounded p-3 {% if profile_form.interests.errors %}is-invalid{% endif %}">
@@ -63,24 +75,30 @@
                                     {% for checkbox in profile_form.interests %}
                                     <div class="col-md-4 col-sm-6">
                                         <div class="form-check">
-                                            {{ checkbox.tag }}
+
+                                            <input type="checkbox"
+                                                   name="{{ checkbox.name }}"
+                                                   value="{{ checkbox.value }}"
+                                                   id="{{ checkbox.id_for_label }}"
+                                                   class="form-check-input"
+                                                   {% if checkbox.is_checked %}checked{% endif %}>
+
                                             <label class="form-check-label" for="{{ checkbox.id_for_label }}">
                                                 {{ checkbox.choice_label }}
                                             </label>
                                         </div>
                                     </div>
-                                    {% empty %}
-                                        <p class="text-muted px-2">Список интересов пуст. Администратор может добавить их на сайте.</p>
                                     {% endfor %}
                                 </div>
                             </div>
-                            {% if profile_form.interests.errors %}<div class="invalid-feedback d-block">{{ profile_form.interests.errors.as_text }}</div>{% endif %}
+                            {% if profile_form.interests.errors %}<div class="invalid-feedback">{{ profile_form.interests.errors|striptags }}</div>{% endif %}
                         </div>
+
                         <div class="mb-3">
                              <label for="{{ profile_form.other_interests.id_for_label }}" class="form-label">Другие интересы (через запятую)</label>
-                             {% render_field profile_form.other_interests class+="form-control" %}
+                             {% render_field profile_form.other_interests class+="form-control" %}{% if profile_form.other_interests.errors %}is-invalid{% endif %}
                              <div class="form-text">Например: Йога, Путешествия, Программирование</div>
-                             {% if profile_form.other_interests.errors %}<div class="invalid-feedback d-block">{{ profile_form.other_interests.errors.as_text }}</div>{% endif %}
+                             {% if profile_form.other_interests.errors %}<div class="invalid-feedback">{{ profile_form.other_interests.errors|striptags }}</div>{% endif %}
                         </div>
 
                         <hr>

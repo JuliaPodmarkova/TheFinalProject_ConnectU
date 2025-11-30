@@ -13,7 +13,7 @@ services:
 
   app:
     build: .
-    # 👇 ВОТ ЭТА СТРОКА ИЗМЕНИЛАСЬ
+
     command: >
       sh -c "./wait-for-it.sh db 5432 &&
              echo 'Postgres is up - starting migration' &&
@@ -39,6 +39,9 @@ services:
     build: ./nginx
     restart: unless-stopped
     volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - staticfiles:/app/staticfiles
+      - mediafiles:/app/mediafiles
       - static_volume:/app/staticfiles
       - media_volume:/app/mediafiles
     ports:
@@ -50,3 +53,5 @@ volumes:
   postgres_data:
   static_volume:
   media_volume:
+  staticfiles:
+  mediafiles:

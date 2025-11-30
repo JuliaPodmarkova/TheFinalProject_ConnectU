@@ -12,7 +12,7 @@ urlpatterns = [
     path('like/<int:pk>/', interactions.like_user_view, name='like_user'),
     path('dislike/<int:pk>/', interactions.dislike_user_view, name='dislike_user'),
 
-    path('signup/', auth_views.register_view, name='signup'),  # <— ИМЕННО ЭТО!!!!
+    path('signup/', auth_views.register_view, name='signup'),
 
     path('login/', auth_views.login_view, name='login'),
     path('logout/', auth_views.logout_view, name='logout'),

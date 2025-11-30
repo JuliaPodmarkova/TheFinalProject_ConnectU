@@ -26,7 +26,7 @@ def index(request):
 
 @login_required
 def profile_own_view(request):
-    # Используем get_object_or_404 для надежности
+
     profile = get_object_or_404(UserProfile, user=request.user)
     context = {
         'profile': profile
@@ -42,25 +42,22 @@ def profile_edit_view(request):
     if request.method == 'POST':
         user_form = UserEditForm(request.POST, instance=user)
         profile_form = UserProfileEditForm(request.POST, request.FILES, instance=profile)
-
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
-
             saved_profile = profile_form.save()
-
             other_text = profile_form.cleaned_data.get('other_interests', '').strip()
             if other_text:
                 interest_names = [name.strip().capitalize() for name in other_text.split(',') if name.strip()]
                 for name in interest_names:
                     interest_obj, created = Interest.objects.get_or_create(name=name)
                     saved_profile.interests.add(interest_obj)
-
             messages.success(request, 'Ваши изменения успешно сохранены!')
             return redirect('profile_own')
         else:
-            messages.error(request, 'Пожалуйста, исправьте ошибки в форме. Они подсвечены красным.')
+            messages.error(request, 'Пожалуйста, исправьте ошибки в форме.')
 
     else:
+
         user_form = UserEditForm(instance=user)
         profile_form = UserProfileEditForm(instance=profile)
 

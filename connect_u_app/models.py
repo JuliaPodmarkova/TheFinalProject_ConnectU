@@ -1,11 +1,30 @@
 from datetime import date
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser, BaseUserManager, User
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.core.files import File
+from django.db.models import Q, UniqueConstraint
+from PIL import Image
+from io import BytesIO
+import os
+
+
+# =========================================================
+# 👇 НАЧАЛО НОВОГО КОДА (ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ) 👇
+# =========================================================
+
+def user_photos_path(instance, filename):
+    # Файлы будут загружаться в MEDIA_ROOT/user_<id>/<filename>
+    return f'user_{instance.user.id}/{filename}'
+
+
+# =========================================================
+# 👆 КОНЕЦ НОВОГО КОДА 👆
+# =========================================================
 
 class CustomUserManager(BaseUserManager):
 
@@ -32,6 +51,7 @@ class CustomUserManager(BaseUserManager):
             raise ValueError(_('Superuser must have is_superuser=True.'))
         return self.create_user(email, password, **extra_fields)
 
+
 class User(AbstractUser):
     GENDER_CHOICES = (
         ('M', 'Мужчина'),
@@ -53,8 +73,10 @@ class User(AbstractUser):
     def age(self):
         if self.birth_date:
             today = timezone.now().date()
-            return today.year - self.birth_date.year - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
+            return today.year - self.birth_date.year - (
+                        (today.month, today.day) < (self.birth_date.month, self.birth_date.day))
         return None
+
 
 class Interest(models.Model):
     name = models.CharField(max_length=50, unique=True, verbose_name="Название интереса")
@@ -66,6 +88,7 @@ class Interest(models.Model):
         verbose_name = "Интерес"
         verbose_name_plural = "Интересы"
         ordering = ['name']
+
 
 class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
@@ -88,14 +111,40 @@ class UserProfile(models.Model):
         if self.user.birth_date:
             today = date.today()
             return today.year - self.user.birth_date.year - (
-                        (today.month, today.day) < (self.user.birth_date.month, self.user.birth_date.day))
+                    (today.month, today.day) < (self.user.birth_date.month, self.user.birth_date.day))
         return None
+
 
 class Photo(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='photos')
-    image = models.ImageField(upload_to='photos/')
+    # 👇 ИЗМЕНЕНИЕ 1: Улучшаем путь для загрузки фото 👇
+    image = models.ImageField(upload_to=user_photos_path)
     is_main = models.BooleanField(default=False)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    # =========================================================
+    # 👇 НАЧАЛО НОВОГО КОДА (ЛОГИКА СЖАТИЯ ФОТО) 👇
+    # =========================================================
+    def save(self, *args, **kwargs):
+        if self.image:
+            pil_img = Image.open(self.image)
+            max_width, max_height = 800, 800
+
+            if pil_img.width > max_width or pil_img.height > max_height:
+                pil_img.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
+
+                in_mem_file = BytesIO()
+                img_format = pil_img.format if pil_img.format in ['JPEG', 'PNG'] else 'JPEG'
+                pil_img.save(in_mem_file, format=img_format)
+                in_mem_file.seek(0)
+
+                self.image = File(in_mem_file, name=self.image.name)
+
+        super().save(*args, **kwargs)
+    # =========================================================
+    # 👆 КОНЕЦ НОВОГО КОДА 👆
+    # =========================================================
+
 
 class Like(models.Model):
     from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes_given')
@@ -108,6 +157,7 @@ class Like(models.Model):
     def __str__(self):
         return f"{self.from_user} likes {self.to_user}"
 
+
 class Dislike(models.Model):
     from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dislikes_given')
     to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dislikes_received')
@@ -119,12 +169,14 @@ class Dislike(models.Model):
     def __str__(self):
         return f"{self.from_user} dislikes {self.to_user}"
 
+
 class Interaction(models.Model):
     REACTION_CHOICES = [('like', 'Like'), ('dislike', 'Dislike')]
     from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='interactions_from')
     to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='interactions_to')
     reaction = models.CharField(max_length=10, choices=REACTION_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
+
 
 @receiver(post_save, sender=User)
 def create_or_update_user_profile(sender, instance, created, **kwargs):
@@ -135,6 +187,7 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
             instance.profile.save()
         else:
             UserProfile.objects.create(user=instance)
+
 
 class Match(models.Model):
     user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='matches_as_user1')
@@ -150,15 +203,18 @@ class Match(models.Model):
         return f"Мэтч между {self.user1.username} и {self.user2.username}"
 
     def save(self, *args, **kwargs):
+        # Гарантируем, что user1.id всегда меньше user2.id для простоты поиска
         if self.user1.id > self.user2.id:
             self.user1, self.user2 = self.user2, self.user1
         super(Match, self).save(*args, **kwargs)
+
 
 class ChatMessage(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='chat_messages')
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+
 
 class Message(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='messages', verbose_name="Мэтч")
@@ -174,4 +230,3 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Сообщение от {self.sender.username} в {self.timestamp.strftime('%Y-%m-%d %H:%M')}"
-

@@ -13,10 +13,13 @@ services:
 
   app:
     build: .
+    # 👇 ВОТ ЭТА СТРОКА ИЗМЕНИЛАСЬ
     command: >
       sh -c "./wait-for-it.sh db 5432 &&
              echo 'Postgres is up - starting migration' &&
              python manage.py migrate &&
+             echo 'Collecting static files' &&
+             python manage.py collectstatic --no-input &&
              echo 'Migration finished - starting daphne' &&
              daphne -b 0.0.0.0 -p 8001 connect_u.asgi:application"
     volumes:

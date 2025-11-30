@@ -6,19 +6,23 @@ from .models import UserProfile, Interest
 User = get_user_model()
 
 class UserRegistrationForm(UserCreationForm):
-    # Если у тебя в кастомном User есть дополнительные поля, например gender и birth_date,
-    # добавь их сюда ЯВНО, если они не подхватываются через fields.
-    # gender = forms.ChoiceField(choices=User.GENDER_CHOICES, required=True)
-    # birth_date = forms.DateField(required=True, widget=forms.DateInput(attrs={'type': 'date'}))
+    gender = forms.ChoiceField(choices=User.GENDER_CHOICES, required=True, label="Пол")
+    birth_date = forms.DateField(required=True, widget=forms.DateInput(attrs={'type': 'date'}), label="Дата рождения")
 
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = UserCreationForm.Meta.fields + ('email', )  # Добавь сюда 'gender', 'birth_date' если они есть
+        fields = UserCreationForm.Meta.fields + ('email', 'gender', 'birth_date')
 
 class UserEditForm(forms.ModelForm):
+    # Явно добавляем поля, чтобы управлять ими
+    gender = forms.ChoiceField(choices=User.GENDER_CHOICES, required=True, label="Пол")
+    birth_date = forms.DateField(required=True, widget=forms.DateInput(attrs={'type': 'date'}), label="Дата рождения")
+
     class Meta:
         model = User
-        fields = ('email',)
+        # Добавляем новые поля сюда!
+        fields = ('email', 'gender', 'birth_date')
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields:

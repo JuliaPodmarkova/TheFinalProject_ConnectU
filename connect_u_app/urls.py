@@ -5,12 +5,14 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView, TokenRefreshView
 )
 
+
 urlpatterns = [
     path('', pages.index, name='home'),
     path('profile/', pages.profile_own_view, name='profile_own'),
     path('profile/edit/', pages.profile_edit_view, name='profile_edit'),
     path('like/<int:pk>/', interactions.like_user_view, name='like_user'),
     path('dislike/<int:pk>/', interactions.dislike_user_view, name='dislike_user'),
+    path('gallery/', pages.photo_gallery_view, name='photo_gallery'),
 
     path('signup/', auth_views.register_view, name='signup'),
 

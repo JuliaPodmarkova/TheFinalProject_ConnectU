@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
-from .models import UserProfile, Interest
+from .models import UserProfile, Interest, Photo
 
 User = get_user_model()
 
@@ -14,13 +14,11 @@ class UserRegistrationForm(UserCreationForm):
         fields = UserCreationForm.Meta.fields + ('email', 'gender', 'birth_date')
 
 class UserEditForm(forms.ModelForm):
-    # Явно добавляем поля, чтобы управлять ими
     gender = forms.ChoiceField(choices=User.GENDER_CHOICES, required=True, label="Пол")
     birth_date = forms.DateField(required=True, widget=forms.DateInput(attrs={'type': 'date'}), label="Дата рождения")
 
     class Meta:
         model = User
-        # Добавляем новые поля сюда!
         fields = ('email', 'gender', 'birth_date')
 
     def __init__(self, *args, **kwargs):
@@ -53,3 +51,14 @@ class UserProfileEditForm(forms.ModelForm):
         for field_name, field in self.fields.items():
             if not isinstance(field.widget, forms.CheckboxSelectMultiple):
                 field.widget.attrs.update({'class': 'form-control'})
+
+class PhotoForm(forms.ModelForm):
+    class Meta:
+        model = Photo
+        fields = ['image']
+        widgets = {
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control'})
+        }
+        labels = {
+            'image': 'Выберите фото для загрузки'
+        }

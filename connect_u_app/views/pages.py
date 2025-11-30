@@ -3,9 +3,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 
-from ..models import UserProfile, Interest, User, Like, Dislike
-from ..forms import UserEditForm, UserProfileEditForm
-
+# 👇 Обновил импорты, добавив Photo и PhotoForm 👇
+from ..models import UserProfile, Interest, User, Like, Dislike, Photo
+from ..forms import UserEditForm, UserProfileEditForm, PhotoForm
 
 @login_required
 def index(request):
@@ -16,23 +16,20 @@ def index(request):
 
     recommended_user = User.objects.exclude(
         Q(id=current_user.id) | Q(id__in=interacted_users_ids)
-    ).order_by('?').first()  # '?' - случайный порядок, first() - берем первого
+    ).order_by('?').first()
 
     context = {
         'recommended_user': recommended_user
     }
     return render(request, 'home.html', context)
 
-
 @login_required
 def profile_own_view(request):
-
     profile = get_object_or_404(UserProfile, user=request.user)
     context = {
         'profile': profile
     }
     return render(request, 'account/profile_own.html', context)
-
 
 @login_required
 def profile_edit_view(request):
@@ -57,7 +54,6 @@ def profile_edit_view(request):
             messages.error(request, 'Пожалуйста, исправьте ошибки в форме.')
 
     else:
-
         user_form = UserEditForm(instance=user)
         profile_form = UserProfileEditForm(instance=profile)
 
@@ -67,3 +63,24 @@ def profile_edit_view(request):
     }
 
     return render(request, 'account/profile_edit.html', context)
+
+@login_required
+def photo_gallery_view(request):
+    user_photos = Photo.objects.filter(user=request.user).order_by('-uploaded_at')
+
+    if request.method == 'POST':
+        photo_form = PhotoForm(request.POST, request.FILES)
+        if photo_form.is_valid():
+            photo = photo_form.save(commit=False)
+            photo.user = request.user
+            photo.save()
+            messages.success(request, 'Фото успешно загружено!')
+            return redirect('photo_gallery')
+    else:
+        photo_form = PhotoForm()
+
+    context = {
+        'photos': user_photos,
+        'photo_form': photo_form
+    }
+    return render(request, 'account/photo_gallery.html', context)

@@ -1,34 +1,35 @@
 <!-- templates/account/signup.html -->
 {% extends "base.html" %}
 
+{% block title %}Регистрация | ConnectU{% endblock %}
+
 {% block content %}
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-md-6 col-lg-5">
             <div class="card mt-5 shadow-sm">
-                <div class="card-body">
-                    <h2 class="card-title text-center">Регистрация</h2>
-                    <p class="text-center text-muted">Присоединяйтесь к тысячам пользователей</p>
+                <div class="card-body p-4">
+                    <h2 class="card-title text-center mb-2">Регистрация</h2>
+                    <p class="text-center text-muted mb-4">Присоединяйтесь к тысячам пользователей</p>
 
                     <form method="post">
-                        {% csrf_token %} <!-- ОБЯЗАТЕЛЬНО! Защита от CSRF-атак -->
+                        {% csrf_token %}
 
-                        <!-- Показываем ошибки, не связанные с конкретным полем (например, "пароли не совпадают") -->
                         {% if form.non_field_errors %}
                             <div class="alert alert-danger">
                                 {% for error in form.non_field_errors %}
-                                    <p>{{ error }}</p>
+                                    <p class="mb-0">{{ error }}</p>
                                 {% endfor %}
                             </div>
                         {% endif %}
 
-                        <!-- Рендерим каждое поле формы с классами Bootstrap -->
                         {% for field in form %}
                             <div class="mb-3">
                                 <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                {{ field }} <!-- Django сам подставит нужный <input> -->
+                                <!-- Django сам подставит <input> с нужными атрибутами -->
+                                {{ field }}
                                 {% if field.help_text %}
-                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                    <small class="form-text text-muted">{{ field.help_text|safe }}</small>
                                 {% endif %}
                                 {% for error in field.errors %}
                                     <div class="invalid-feedback d-block">
@@ -38,14 +39,16 @@
                             </div>
                         {% endfor %}
 
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+                        <div class="d-grid mt-4">
+                            <!-- ИЗМЕНЕНИЕ: btn-primary -> btn-danger -->
+                            <button type="submit" class="btn btn-danger btn-lg">Зарегистрироваться</button>
                         </div>
                     </form>
 
-                    <hr>
+                    <hr class="my-4">
+
                     <div class="text-center">
-                        <small class="text-muted">Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a></small>
+                        <small class="text-muted">Уже есть аккаунт? <a href="{% url 'login' %}" class="link-danger">Войти</a></small>
                     </div>
                 </div>
             </div>

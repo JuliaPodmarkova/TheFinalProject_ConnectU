@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Поиск | ConnectU{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Поиск пользователей</h2>
+
+    <!-- Форма поиска -->
+    <form method="get" action="{% url 'search' %}" class="mb-5">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Введите имя для поиска..." value="{{ query|default:'' }}">
+            <button class="btn btn-primary" type="submit">Найти</button>
+        </div>
+    </form>
+
+    <!-- Результаты поиска -->
+    {% if query %}
+        <h4 class="mb-3">Результаты по запросу: "{{ query }}"</h4>
+
+        {% if results %}
+            <div class="row g-3">
+                {% for profile in results %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 shadow-sm">
+                            <img src="{{ profile.get_avatar_url }}" class="card-img-top" style="height: 250px; object-fit: cover;" alt="Фото {{ profile.full_name }}">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ profile.full_name }}, {{ profile.age }}</h5>
+                                <p class="card-text text-muted">{{ profile.city }}</p>
+                                <!-- Можно добавить кнопку "Посмотреть профиль", если у вас есть публичные профили -->
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted">Ничего не найдено. Попробуйте другой запрос.</p>
+        {% endif %}
+    {% else %}
+        <p class="text-muted">Введите имя в строке поиска, чтобы найти пользователей.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

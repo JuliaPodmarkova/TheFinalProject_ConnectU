@@ -1,10 +1,9 @@
 from django.urls import path
-from .views import pages, interactions, auth_views,actions
+from .views import pages, interactions, auth_views, actions
 from django.views.generic.base import RedirectView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView, TokenRefreshView
 )
-
 
 urlpatterns = [
     path('', pages.index, name='home'),
@@ -13,13 +12,13 @@ urlpatterns = [
     path('like/<int:pk>/', interactions.like_user_view, name='like_user'),
     path('dislike/<int:pk>/', interactions.dislike_user_view, name='dislike_user'),
     path('gallery/', pages.photo_gallery_view, name='photo_gallery'),
-
     path('signup/', auth_views.register_view, name='signup'),
-
     path('login/', auth_views.login_view, name='login'),
     path('logout/', auth_views.logout_view, name='logout'),
-
     path('next/', interactions.show_next_user_view, name='show_next_user'),
+    path('profile/<int:user_id>/', pages.profile_view, name='profile_view'),
+
+    path('search/', pages.search_view, name='search'),
 
     path('accounts/login/', RedirectView.as_view(url='/login/', permanent=False)),
     path('accounts/logout/', RedirectView.as_view(url='/logout/', permanent=False)),

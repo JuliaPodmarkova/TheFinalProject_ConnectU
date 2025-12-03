@@ -1,0 +1,49 @@
+<!-- templates/partials/_header.html -->
+<header class="main-header sticky-top">
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">ConnectU</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">Лента</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'match_list' %}">Мои матчи</a>
+                    </li>
+                    <li class="nav-item">
+                        <!-- ИЗМЕНЕНИЕ: Ссылка теперь ведет на список матчей/чатов -->
+                        <a class="nav-link" href="{% url 'match_list' %}">Сообщения</a>
+                    </li>
+                </ul>
+
+                <!-- ДОБАВЛЕНИЕ: Форма поиска -->
+                <form class="d-flex me-3" action="{% url 'search' %}" method="get">
+                    <input class="form-control me-2" type="search" name="q" placeholder="Поиск" aria-label="Search">
+                    <button class="btn btn-outline-primary" type="submit">🔍</button>
+                </form>
+
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'profile_own' %}">Профиль</a>
+                        </li>
+                         <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout' %}">Выйти</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Войти</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'signup' %}">Регистрация</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>

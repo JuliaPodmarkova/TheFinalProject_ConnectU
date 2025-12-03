@@ -1,59 +1,67 @@
+<!-- templates/partials/user_card.html -->
 {% load static %}
 {% if recommended_user %}
-<div class="card shadow-sm mb-4">
-    <!-- ИСПРАВЛЕНО: Добавлена проверка на наличие аватара -->
+<div class="card shadow-sm mb-4 border-0">
+
     {% if recommended_user.profile.avatar %}
-        <img src="{{ recommended_user.profile.avatar.url }}" class="card-img-top" alt="Фото {{ recommended_user.profile.full_name }}" style="height: 500px; object-fit: cover;">
+        <img src="{{ recommended_user.profile.avatar.url }}" class="card-img-top user-card-img" alt="Фото {{ recommended_user.profile.full_name }}">
     {% else %}
-        <!-- Если аватара нет, показываем картинку-заглушку -->
-        <img src="{% static 'images/default_avatar.png' %}" class="card-img-top" alt="Нет фото" style="height: 500px; object-fit: cover;">
-        <!-- Убедись, что у тебя есть файл /static/images/default_avatar.png -->
+        <img src="{% static 'images/default_avatar.png' %}" class="card-img-top user-card-img" alt="Нет фото">
     {% endif %}
 
-    <div class="card-body">
-        <h4 class="card-title">{{ recommended_user.profile.full_name }}, {{ recommended_user.profile.age }}</h4>
-        <p class="card-text text-muted">
-            <i class="fas fa-map-marker-alt me-1"></i> {{ recommended_user.profile.city }} <br>
-            {% if recommended_user.profile.interests.all %}
-            <i class="fas fa-heart me-1"></i> Интересы:
-            {% for interest in recommended_user.profile.interests.all %}
-                {{ interest.name }}{% if not forloop.last %}, {% endif %}
-            {% endfor %}
-            {% endif %}
+    <div class="card-body p-4">
+        <h3 class="card-title">{{ recommended_user.profile.full_name }}, {{ recommended_user.profile.age }}</h3>
+        <p class="card-text text-muted mb-2">
+            <i class="fa-solid fa-location-dot me-1"></i> {{ recommended_user.profile.city }}
         </p>
+
+        {% if recommended_user.profile.interests.all %}
+        <p class="card-text">
+            {% for interest in recommended_user.profile.interests.all %}
+                <span class="badge bg-light text-dark fw-normal me-1">{{ interest.name }}</span>
+            {% endfor %}
+        </p>
+        {% endif %}
     </div>
 
-    <!-- Кнопки с магией HTMX (здесь всё было правильно!) -->
-    <div class="card-footer bg-white p-3">
-        <div class="d-flex justify-content-around">
+    <!-- Обновленный блок с кнопками -->
+    <div class="card-footer bg-transparent border-0 pb-4 pt-0">
+        <div class="d-flex justify-content-around align-items-center">
+
+            <!-- Дизлайк -->
             <button
-                class="btn btn-outline-danger btn-lg rounded-circle" style="width: 70px; height: 70px;"
+                class="btn btn-light action-btn rounded-circle"
                 hx-post="{% url 'dislike_user' recommended_user.id %}"
                 hx-target="#user-card-container"
                 hx-swap="innerHTML"
+                title="Не нравится"
             >
-                <i class="fas fa-times fa-2x"></i>
+                <i class="fa-solid fa-xmark"></i>
             </button>
 
-            <button class="btn btn-outline-info btn-lg rounded-circle" style="width: 70px; height: 70px;">
-                <i class="fas fa-comment-dots fa-2x"></i>
+            <!-- Сообщение (пока без действия) -->
+            <button class="btn btn-primary action-btn rounded-circle" title="Написать сообщение">
+                <i class="fa-solid fa-comment-dots"></i>
             </button>
 
+            <!-- Лайк -->
             <button
-                class="btn btn-outline-success btn-lg rounded-circle" style="width: 70px; height: 70px;"
+                class="btn btn-danger action-btn rounded-circle"
                 hx-post="{% url 'like_user' recommended_user.id %}"
                 hx-target="#user-card-container"
                 hx-swap="innerHTML"
+                title="Нравится"
             >
-                <i class="fas fa-heart fa-2x"></i>
+                <i class="fa-solid fa-heart"></i>
             </button>
+
         </div>
     </div>
 </div>
 {% else %}
-<!-- Если подходящих пользователей не найдено -->
-<div class="text-center p-5">
-    <i class="fas fa-users-slash fa-4x text-muted mb-3"></i>
+<!-- Этот блок остался без изменений, он и так хорош -->
+<div class="text-center p-5 mt-5">
+    <i class="fa-regular fa-face-sad-tear fa-4x text-muted mb-4"></i>
     <h4 class="text-muted">Новых анкет пока нет</h4>
     <p class="text-muted">Загляните позже, мы обязательно подберем для вас кого-нибудь!</p>
 </div>

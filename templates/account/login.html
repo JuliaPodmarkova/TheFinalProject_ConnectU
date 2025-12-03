@@ -1,58 +1,111 @@
-{% extends 'base.html' %}
-{% load static %}
+<!-- templates/account/login.html -->
+{% extends "base.html" %}
+
+{% block title %}Вход | ConnectU{% endblock %}
 
 {% block content %}
-<div class="auth-container">
-    <div class="auth-card">
-        <h2>Вход в ConnectU</h2>
-        <p>Найдите свою пару уже сегодня!</p>
-        <form id="login-form" method="post" action="{% url 'login' %}">
-            {% csrf_token %}
-            {{ form.non_field_errors }}
-            <div class="form-group">
-                <label for="id_username">Email или Логин</label>
-                {{ form.username }}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card mt-5 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="card-title text-center mb-2">Вход в ConnectU</h2>
+                    <p class="text-center text-muted mb-4">Найдите свою пару уже сегодня!</p>
+
+                    <!--
+                        ВАЖНО: Форма и её элементы сохранили свои ID,
+                        чтобы твой JavaScript-обработчик продолжал работать.
+                    -->
+                    <form id="login-form" method="post" action="{% url 'login' %}">
+                        {% csrf_token %}
+
+                        <!-- Блок для ошибок от Django (если JS отключен) -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    <p class="mb-0">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Поле Email/Логин -->
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label">Email или Логин</label>
+                            <input type="text" name="username" class="form-control" id="id_username" required>
+                        </div>
+
+                        <!-- Поле Пароль -->
+                        <div class="mb-3">
+                            <label for="id_password" class="form-label">Пароль</label>
+                            <input type="password" name="password" class="form-control" id="id_password" required>
+                        </div>
+
+                        <!--
+                            Блок для ошибок от JavaScript.
+                            Скрыт по умолчанию, появляется при ошибке.
+                        -->
+                        <div id="error-message" class="alert alert-danger mt-3" style="display: none;"></div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-danger btn-lg">Войти</button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <small class="text-muted">Нет аккаунта? <a href="{% url 'signup' %}" class="link-danger">Зарегистрироваться</a></small>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="id_password">Пароль</label>
-                {{ form.password }}
-            </div>
-            <button type="submit" class="btn-primary">Войти</button>
-            <p class="auth-switch">Нет аккаунта? <a href="{% url 'signup' %}">Зарегистрироваться</a></p>
-            <div id="error-message" class="error-message"></div>
-        </form>
+        </div>
     </div>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
 <script>
     document.getElementById('login-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('id_username').value;
-        const password = document.getElementById('id_password').value;
-        const errorMessage = document.getElementById('error-message');
+        e.preventDefault(); // Предотвращаем стандартную отправку формы
+
+        const form = e.target;
+        const emailInput = document.getElementById('id_username');
+        const passwordInput = document.getElementById('id_password');
+        const errorMessageDiv = document.getElementById('error-message');
+
+        // Сбрасываем предыдущие ошибки
+        errorMessageDiv.textContent = '';
+        errorMessageDiv.style.display = 'none';
 
         try {
+            // ИЗМЕНЕНИЕ: Возвращаем прямой URL, который у тебя был
             const response = await fetch('/api/v1/auth/jwt/create/', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({
+                    email: emailInput.value,
+                    password: passwordInput.value
+                })
             });
 
             const data = await response.json();
 
             if (response.ok) {
+                // Если успешно, сохраняем токены и перенаправляем
                 localStorage.setItem('access', data.access);
                 localStorage.setItem('refresh', data.refresh);
-                window.location.href = '/'; // Перенаправляем на главную
+                window.location.href = '/'; // Перенаправление на главную
             } else {
-                errorMessage.textContent = 'Неверный email или пароль. Попробуйте снова.';
+                // Показываем ошибку в нашем блоке
+                const errorText = data.detail || 'Неверный email или пароль.';
+                errorMessageDiv.textContent = errorText;
+                errorMessageDiv.style.display = 'block';
             }
         } catch (error) {
-            errorMessage.textContent = 'Произошла ошибка. Пожалуйста, попробуйте позже.';
+            errorMessageDiv.textContent = 'Произошла ошибка сети. Пожалуйста, попробуйте позже.';
+            errorMessageDiv.style.display = 'block';
         }
-
-        // Для Django формы — не отправлять форму "вручную", пусть JS решает всё
-        // если хочешь fallback — закомментируй e.preventDefault() внутри try/catch!
     });
 </script>
 {% endblock %}

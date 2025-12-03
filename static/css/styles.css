@@ -1,202 +1,224 @@
+/* ==========================================================================
+   1. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И СТИЛИ
+   ========================================================================== */
+
 :root {
-    --primary-color: #4A96FF;
-    --accent-color: #FF6B6B;
-    --background-color: #F5F7FA;
-    --text-color: #2D3436;
-    --card-bg: #FFFFFF;
-    --font-header: 'Montserrat', sans-serif;
-    --font-body: 'Open Sans', sans-serif;
+  --color-primary: #4A96FF;    /* Нежно-голубой, основной для акцентов и ссылок */
+  --color-accent: #FF6B6B;     /* Коралловый, для лайков и ярких кнопок */
+  --color-background: #F5F7FA; /* Светло-серый фон */
+  --color-text: #2D3436;       /* Тёмно-серый текст */
+  --color-success: #6BCB77;    /* Пастельный зелёный */
+  --font-header: 'Montserrat', sans-serif;
+  --font-body: 'Open Sans', sans-serif;
 }
 
 body {
-    background-color: var(--background-color);
-    font-family: var(--font-body);
-    color: var(--text-color);
-    margin: 0;
-    padding-top: 70px; /* Высота шапки */
+  background-color: var(--color-background);
+  font-family: var(--font-body);
+  color: var(--color-text);
+  line-height: 1.6; /* Улучшает читаемость текста */
 }
 
-/* --- ШАПКА --- */
-.top-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 5%;
-    background-color: var(--card-bg);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    height: 70px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-header);
+  font-weight: 700;
 }
 
-.logo {
+/* ==========================================================================
+   2. КАСТОМИЗАЦИЯ BOOTSTRAP
+   ========================================================================== */
+
+/* --- Шапка (Navbar) --- */
+.main-header {
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Добавим легкую тень для глубины */
+}
+
+.navbar-brand {
     font-family: var(--font-header);
     font-weight: 700;
-    font-size: 24px;
-    color: var(--primary-color);
-    text-decoration: none;
+    font-size: 1.5rem;
+    color: var(--color-text) !important;
 }
 
-.nav-links {
-    display: flex;
-    align-items: center;
-    gap: 30px;
-    margin-left: auto; /* Двигаем ссылки в центр */
-    margin-right: 30px;
-}
-
-.nav-item {
-    text-decoration: none;
-    color: var(--text-color);
-    font-size: 16px;
+.navbar .nav-link {
     font-weight: 600;
-    padding: 10px 0;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s ease;
+    color: var(--color-text);
+    transition: color 0.2s ease-in-out;
 }
 
-.nav-item:hover, .nav-item.active {
-    color: var(--primary-color);
-    border-bottom-color: var(--primary-color);
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+    color: var(--color-primary); /* Меняем на основной цвет для консистентности */
 }
 
-.icon-btn {
-    background: none;
+/* --- Кнопки (Buttons) --- */
+.btn-primary {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    font-weight: 600;
+    border-radius: 0.5rem;
+    padding: 0.6rem 1.2rem;
+}
+.btn-primary:hover {
+    background-color: #3b87f8; /* Чуть темнее при наведении */
+    border-color: #3b87f8;
+}
+
+.btn-danger {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    font-weight: 600;
+    border-radius: 0.5rem;
+    padding: 0.6rem 1.2rem;
+}
+.btn-danger:hover {
+    background-color: #e65c5c;
+    border-color: #e65c5c;
+}
+
+/* --- Карточки (Cards) --- */
+.card {
     border: none;
-    cursor: pointer;
-    font-family: inherit;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Более мягкая тень по умолчанию */
 }
 
-.user-block {
+/* --- Формы (Forms) --- */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.25rem rgba(74, 150, 255, 0.25);
+}
+
+/* ==========================================================================
+   3. СПЕЦИФИЧНЫЕ КОМПОНЕНТЫ
+   ========================================================================== */
+
+/* --- Карточка пользователя на главной --- */
+.user-card-img {
+  height: 500px;
+  object-fit: cover;
+  object-position: center;
+}
+
+.action-btn {
+  width: 4.5rem;
+  height: 4.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  box-shadow: var(--bs-box-shadow-sm) !important;
+  transition: transform 0.15s ease-in-out;
+}
+.action-btn:hover {
+  transform: scale(1.1);
+}
+
+/* --- Выбор интересов в форме --- */
+.interest-checkbox-group {
     display: flex;
-    align-items: center;
-    gap: 15px;
-    position: relative;
+    flex-wrap: wrap;
+    gap: 0.75rem;
 }
-
-.user-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-.user-name { font-weight: 600; }
-.user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-
-.user-dropdown {
+.interest-checkbox-group .form-check-input {
     display: none;
-    position: absolute;
-    top: 110%;
-    right: 0;
-    background: var(--card-bg);
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    min-width: 160px;
-    overflow: hidden;
 }
-
-.user-block:hover .user-dropdown { display: block; }
-.user-dropdown a {
-    display: block;
-    padding: 12px 15px;
-    text-decoration: none;
-    color: var(--text-color);
-    transition: background-color 0.2s;
-}
-.user-dropdown a:hover { background-color: #f0f0f0; }
-
-/* --- КНОПКИ --- */
-.btn-primary, .btn-secondary {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
+.interest-checkbox-group .form-check-label {
+    padding: 0.5rem 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 2rem;
     cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-    transition: all 0.2s ease;
+    transition: all 0.2s ease-in-out;
+    user-select: none;
+}
+.interest-checkbox-group .form-check-input:checked + .form-check-label {
+    background-color: var(--color-primary);
+    color: #fff;
+    border-color: var(--color-primary);
+    font-weight: 500;
+}
+.interest-checkbox-group .form-check-label:hover {
+    border-color: var(--color-primary);
 }
 
-.btn-primary { background-color: var(--accent-color); color: white; }
-.btn-primary:hover { background-color: #e65c5c; }
-.btn-secondary { background-color: #e0e0e0; color: var(--text-color); }
-.btn-secondary:hover { background-color: #d0d0d0; }
+/* --- Загрузка аватара в форме --- */
+.avatar-upload-container {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+.avatar-preview {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    background-color: #f8f9fa;
+    border: 2px solid #dee2e6;
+}
 
-/* --- ОСНОВНОЙ КОНТЕНТ И ЛЕНТА --- */
-.main-content { padding: 40px 20px; }
-.feed-container { max-width: 340px; margin: 0 auto; }
-
-.profile-card {
-    width: 340px;
-    height: 520px;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+/* --- Страница просмотра профиля --- */
+.profile-header {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: var(--bs-box-shadow-sm);
     position: relative;
-    background: var(--card-bg);
+    overflow: hidden;
+}
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* --- Стили для страницы "Мои мэтчи" --- */
+.match-card {
     display: flex;
     flex-direction: column;
-    transform: scale(0.95);
-    opacity: 0;
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
-}
-
-.profile-card.active { transform: scale(1); opacity: 1; }
-/* ... (остальные стили для карточки, кнопок и т.д.) ... */
-
-/* --- МОДАЛЬНОЕ ОКНО ФИЛЬТРОВ --- */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
     align-items: center;
-    z-index: 2000;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s;
-}
-
-.modal-overlay.visible { opacity: 1; visibility: visible; }
-.modal-content {
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    width: 90%;
-    max-width: 400px;
-    position: relative;
-    transform: scale(0.9);
-    transition: transform 0.3s;
-}
-
-.modal-overlay.visible .modal-content { transform: scale(1); }
-.modal-close-btn {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    background: none;
-    border: none;
-    font-size: 28px;
-    cursor: pointer;
-    color: #aaa;
-}
-/* ... (стили для формы внутри модалки) ... */
-
-/* --- СТРАНИЦЫ ВХОДА/РЕГИСТРАЦИИ --- */
-.auth-container { display: flex; justify-content: center; align-items: center; padding-top: 50px; }
-.auth-card {
-    background: var(--card-bg);
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-    width: 100%;
-    max-width: 400px;
     text-align: center;
+    padding: 1.5rem;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    text-decoration: none; /* Убираем подчеркивание у ссылки */
+    color: var(--color-text);
 }
-.auth-card h2 { font-family: var(--font-header); margin-top: 0; }
-.auth-card .form-group { text-align: left; }
-.auth-card button { width: 100%; margin-top: 10px; padding: 12px; }
-.auth-switch { margin-top: 20px; font-size: 14px; }
-.error-message { color: var(--accent-color); margin-top: 15px; font-weight: 600; min-height: 20px; }
+
+.match-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.match-card-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1rem;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.match-card-name {
+    font-family: var(--font-header);
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Стили для блока-заглушки, если нет мэтчей */
+.no-matches-placeholder {
+    text-align: center;
+    padding: 3rem;
+    background-color: #fff;
+    border-radius: 1rem;
+}
+.no-matches-placeholder i {
+    font-size: 3rem;
+    color: var(--color-primary);
+}

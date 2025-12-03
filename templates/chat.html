@@ -1,21 +1,34 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}Чат с {{ other_user.profile.full_name }}{% endblock %}
 
 {% block content %}
 <style>
+    /* Я оставил стили здесь для удобства, но лучше перенести их в main.css */
     .chat-container {
-        max-width: 800px;
-        margin: auto;
-        border: 1px solid #ddd;
-        border-radius: 8px;
         display: flex;
         flex-direction: column;
-        height: 75vh;
+        height: calc(100vh - 150px); /* Адаптивная высота под экран */
+        max-width: 800px;
+        margin: auto;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     .chat-header {
         padding: 1rem;
-        border-bottom: 1px solid #ddd;
-        background-color: #f8f9fa;
-        font-weight: bold;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .chat-header img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
     }
     .chat-messages {
         flex-grow: 1;
@@ -23,57 +36,123 @@
         padding: 1rem;
         display: flex;
         flex-direction: column;
+        gap: 0.75rem;
     }
     .message {
-        max-width: 70%;
+        display: flex;
+        align-items: flex-end;
+        gap: 0.5rem;
+        max-width: 75%;
+    }
+    .message-bubble {
         padding: 0.5rem 1rem;
-        border-radius: 1rem;
-        margin-bottom: 0.5rem;
+        border-radius: 1.25rem;
+        word-wrap: break-word;
     }
-    .message.sent {
-        background-color: #0d6efd;
-        color: white;
-        align-self: flex-end;
-        border-bottom-right-radius: 0;
-    }
-    .message.received {
-        background-color: #e9ecef;
-        color: black;
-        align-self: flex-start;
-        border-bottom-left-radius: 0;
-    }
+    .message.sent { align-self: flex-end; }
+    .message.sent .message-bubble { background-color: var(--color-primary); color: white; border-bottom-right-radius: 0.25rem; }
+
+    .message.received { align-self: flex-start; }
+    .message.received .message-bubble { background-color: #e9ecef; color: var(--color-text); border-bottom-left-radius: 0.25rem; }
+
     .chat-form {
         padding: 1rem;
-        border-top: 1px solid #ddd;
+        border-top: 1px solid #e9ecef;
     }
 </style>
 
 <div class="chat-container">
     <div class="chat-header">
-        Чат с {{ other_user.profile.full_name }}
+        <img src="{{ other_user.profile.get_avatar_url }}" alt="{{ other_user.profile.full_name }}">
+        <h5 class="mb-0">{{ other_user.profile.full_name }}</h5>
     </div>
 
     <div class="chat-messages" id="chat-messages">
         {% for message in messages %}
             <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %}">
-                {{ message.content|linebreaksbr }}
+                <div class="message-bubble">
+                    {{ message.content|linebreaksbr }}
+                </div>
             </div>
         {% endfor %}
     </div>
 
     <div class="chat-form">
-        <form method="post" class="d-flex">
-            {% csrf_token %}
-            <textarea name="content" class="form-control me-2" rows="2" placeholder="Напишите сообщение..." required></textarea>
+        <form id="chat-form" class="d-flex">
+            <input type="text" id="chat-message-input" class="form-control me-2" placeholder="Напишите сообщение..." autocomplete="off">
             <button type="submit" class="btn btn-primary">Отправить</button>
         </form>
     </div>
 </div>
 
-<script>
-    // Автоматически прокручиваем чат до последнего сообщения
-    const chatMessages = document.getElementById('chat-messages');
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-</script>
+{{ match.id|json_script:"match-id" }}
+{{ request.user.id|json_script:"user-id" }}
 
+<script>
+    const matchId = JSON.parse(document.getElementById('match-id').textContent);
+    const currentUserId = JSON.parse(document.getElementById('user-id').textContent);
+
+    const chatSocket = new WebSocket(
+        'ws://'
+        + window.location.host
+        + '/ws/chat/'
+        + matchId
+        + '/'
+    );
+
+    const chatMessages = document.getElementById('chat-messages');
+
+    // Функция для прокрутки вниз
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    // Прокрутка при загрузке страницы
+    scrollToBottom();
+
+    // Слушаем сообщения от сервера
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+
+        const messageType = data.sender_id === currentUserId ? 'sent' : 'received';
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message ' + messageType;
+
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'message-bubble';
+        bubbleDiv.innerHTML = data.message.replace(/\n/g, '<br>'); // Заменяем переносы строк на <br>
+
+        messageDiv.appendChild(bubbleDiv);
+        chatMessages.appendChild(messageDiv);
+
+        scrollToBottom(); // Прокрутка после получения нового сообщения
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    const messageInput = document.getElementById('chat-message-input');
+    messageInput.focus();
+
+    // Отправляем сообщение по нажатию Enter
+    messageInput.onkeyup = function(e) {
+        if (e.key === 'Enter') {  // enter, return
+            document.getElementById('chat-form').requestSubmit();
+        }
+    };
+
+    // Отправляем сообщение при сабмите формы
+    document.getElementById('chat-form').onsubmit = function(e) {
+        e.preventDefault();
+        const message = messageInput.value;
+        if (message.trim() === '') return;
+
+        chatSocket.send(JSON.stringify({
+            'message': message
+        }));
+
+        messageInput.value = '';
+    };
+</script>
 {% endblock %}

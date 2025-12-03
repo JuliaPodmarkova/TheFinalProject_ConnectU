@@ -45,43 +45,46 @@
             {% if page_obj %}
                 <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
 
-                    <!-- == НАЧАЛО ИСПРАВЛЕННОГО БЛОКА == -->
-                    {% for user_obj in page_obj %}
-                        <div class="col">
-                            <div class="card h-100 shadow-sm user-card">
-                                <a href="{% url 'profile_view' user_obj.id %}">
-                                    <img src="{{ user_obj.profile.get_avatar_url }}" class="card-img-top" alt="{{ user_obj.profile.full_name }}">
-                                </a>
-                                <div class="card-body">
-                                    <h5 class="card-title">
-                                        <a href="{% url 'profile_view' user_obj.id %}" class="text-decoration-none text-dark">
-                                            {{ user_obj.profile.full_name }}, {{ user_obj.age }}
-                                        </a>
-                                    </h5>
-                                    <p class="card-text text-muted">
-                                        <i class="fas fa-map-marker-alt me-1"></i>
-                                        {{ user_obj.profile.city|default:"Город не указан" }}
-                                    </p>
-                                </div>
-                                <div class="card-footer bg-white border-0 p-3">
-                                    <!-- Формы для лайка и дизлайка -->
-                                    <div class="d-flex justify-content-around">
-                                        <form action="{% url 'dislike_user' user_obj.id %}" method="post">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-outline-secondary btn-circle btn-lg"><i class="fas fa-times"></i></button>
-                                        </form>
-                                        <form action="{% url 'like_user' user_obj.id %}" method="post">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-outline-danger btn-circle btn-lg"><i class="fas fa-heart"></i></button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                    <!-- == КОНЕЦ ИСПРАВЛЕННОГО БЛОКА == -->
 
+        {% for user_obj in page_obj %}
+            <div class="col user-card-wrapper"> <!-- Обертка для плавного исчезновения -->
+                <div class="card h-100 shadow-sm user-card">
+                    <a href="{% url 'profile_view' user_obj.id %}">
+                        <img src="{{ user_obj.profile.get_avatar_url }}" class="card-img-top" alt="{{ user_obj.profile.full_name }}">
+                    </a>
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="{% url 'profile_view' user_obj.id %}" class="text-decoration-none text-dark">
+                                {{ user_obj.profile.full_name }}, {{ user_obj.age }}
+                            </a>
+                        </h5>
+                        <p class="card-text text-muted">
+                            <i class="fas fa-map-marker-alt me-1"></i>
+                            {{ user_obj.profile.city|default:"Город не указан" }}
+                        </p>
+                    </div>
+                    <div class="card-footer bg-white border-0 p-3">
+                        <div class="d-flex justify-content-around">
+                            <!-- ИЗМЕНЕНИЯ ЗДЕСЬ -->
+                            <form hx-post="{% url 'dislike_user' user_obj.id %}"
+                                  hx-target="closest .user-card-wrapper"
+                                  hx-swap="outerHTML"
+                                  class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-secondary btn-circle btn-lg"><i class="fas fa-times"></i></button>
+                            </form>
+                            <form hx-post="{% url 'like_user' user_obj.id %}"
+                                  hx-target="closest .user-card-wrapper"
+                                  hx-swap="outerHTML"
+                                  class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-circle btn-lg"><i class="fas fa-heart"></i></button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
+            </div>
+        {% endfor %}
 
                 <!-- Пагинация, которая работает с фильтрами -->
                 <nav aria-label="Page navigation" class="mt-5">

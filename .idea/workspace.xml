@@ -5,33 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1587ceec-4b57-4d39-ad89-7d56d9c39185" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/templates/account/profile_public.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/partials/_header.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/search.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/ConnectU.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ConnectU.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u/asgi.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u/asgi.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/consumers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/routing.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/routing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/views/pages.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/views/pages.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nginx/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/nginx/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nginx/defalt.conf" beforeDir="false" afterPath="$PROJECT_DIR$/nginx/default.conf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/account/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/account/profile_edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account/profile_edit.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/account/profile_own.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account/profile_own.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/account/signup.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account/signup.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/connect_u_app/views/actions.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/views/actions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/chat.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/matches.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/matches.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/partials/user_card.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/partials/user_card.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wait-for-it.sh" beforeDir="false" afterPath="$PROJECT_DIR$/wait-for-it.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

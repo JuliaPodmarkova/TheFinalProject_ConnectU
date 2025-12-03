@@ -33,7 +33,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8RM/S/" crossorigin="anonymous"></script>
 
     <!-- Скрипт для интеграции HTMX с Django CSRF токеном -->
     <script>
@@ -41,6 +41,35 @@
             event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
         })
     </script>
+
+    <!-- =============================================================== -->
+    <!-- == НАЧАЛО БЛОКА, КОТОРЫЙ Я ДОБАВИЛ == -->
+    <!-- =============================================================== -->
+
+    <!-- Модальное окно для мэтча (изначально пустое) -->
+    <div class="modal fade" id="matchModal" tabindex="-1" aria-labelledby="matchModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" id="match-modal-content">
+            <!-- Содержимое будет загружено через HTMX из вьюхи -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Небольшой скрипт для управления модальным окном -->
+    <script>
+        // Создаем экземпляр модального окна Bootstrap, чтобы им можно было управлять
+        const matchModal = new bootstrap.Modal(document.getElementById('matchModal'));
+
+        // Слушаем кастомное событие 'showMatchModal', которое отправляет сервер через заголовок HX-Trigger
+        document.body.addEventListener('showMatchModal', function() {
+            // Показываем модальное окно
+            matchModal.show();
+        });
+    </script>
+
+    <!-- =============================================================== -->
+    <!-- == КОНЕЦ БЛОКА, КОТОРЫЙ Я ДОБАВИЛ == -->
+    <!-- =============================================================== -->
 
     {% block extra_js %}{% endblock %}
 </body>

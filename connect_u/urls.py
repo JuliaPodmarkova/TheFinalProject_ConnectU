@@ -7,6 +7,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('connect_u_app.urls')),
     path('oauth/', include('social_django.urls', namespace='social')),
+    path('api/v1/', include('connect_u_app.api_urls')),
     # path('', include('django.contrib.auth.urls')),
 ]
 

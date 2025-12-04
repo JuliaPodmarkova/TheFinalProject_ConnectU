@@ -1,33 +1,40 @@
-# connect_u_app/serializers.py
-
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from .models import User, UserProfile, Photo, Interaction, Match, Interest
+from .models import UserProfile, Interest  # <--- ИЗМЕНЕНИЕ: импортируем UserProfile
 
-class UserSerializer(serializers.ModelSerializer):
+User = get_user_model()
+
+
+class UserSerializerForProfile(serializers.ModelSerializer):
+    """
+    Упрощенный сериализатор пользователя для вложения в профиль.
+    """
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'email')
+        # Добавим age из свойства модели User
+        fields = ['id', 'username', 'email', 'gender', 'age']
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    class Meta:
-        model = UserProfile
-        fields = '__all__'
 
-class PhotoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Photo
-        fields = '__all__'
+class ProfileSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для модели UserProfile.
+    """
+    user = UserSerializerForProfile(read_only=True)
+    avatar_url = serializers.CharField(source='get_avatar_url', read_only=True)
 
-class InteractionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Interaction
-        fields = '__all__'
-
-class MatchSerializer(serializers.ModelSerializer):
-    user1 = UserSerializer(read_only=True)
-    user2 = UserSerializer(read_only=True)
+    # ИЗМЕНЕНИЕ: Правильно обрабатываем ManyToMany поле 'interests'
+    # StringRelatedField будет использовать __str__ метод модели Interest (т.е. вернет названия интересов)
+    interests = serializers.StringRelatedField(many=True, read_only=True)
 
     class Meta:
-        model = Match
-        fields = '__all__'
+        model = UserProfile  # <--- ИЗМЕНЕНИЕ: указали правильную модель
+        fields = [
+            'user',
+            'full_name',
+            'bio',
+            'city',
+            'status',
+            'interests',  # <--- ИЗМЕНЕНИЕ: используем реальное имя поля
+            'avatar_url',
+        ]

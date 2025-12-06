@@ -1,4 +1,3 @@
-<!-- templates/partials/_header.html -->
 <header class="main-header sticky-top">
     <nav class="navbar navbar-expand-lg">
         <div class="container">
@@ -12,15 +11,13 @@
                         <a class="nav-link" href="{% url 'home' %}">Лента</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'match_list' %}">Мои матчи</a>
+                        <a class="nav-link" href="{% url 'match_list' %}">Мои мэтчи</a>
                     </li>
                     <li class="nav-item">
-                        <!-- ИЗМЕНЕНИЕ: Ссылка теперь ведет на список матчей/чатов -->
                         <a class="nav-link" href="{% url 'match_list' %}">Сообщения</a>
                     </li>
                 </ul>
 
-                <!-- ДОБАВЛЕНИЕ: Форма поиска -->
                 <form class="d-flex me-3" action="{% url 'search' %}" method="get">
                     <input class="form-control me-2" type="search" name="q" placeholder="Поиск" aria-label="Search">
                     <button class="btn btn-outline-primary" type="submit">🔍</button>
@@ -28,11 +25,20 @@
 
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'profile_own' %}">Профиль</a>
-                        </li>
-                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'logout' %}">Выйти</a>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+
+                                <img src="{{ user.profile.get_avatar_url }}" alt="avatar" class="rounded-circle me-2" width="30" height="30" style="object-fit: cover;">
+
+                                {{ user.profile.full_name|default:user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{% url 'profile_own' %}">🧐 Мой профиль</a></li>
+                                <li><a class="dropdown-item" href="{% url 'profile_edit' %}">✏️ Редактировать</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}">🚪 Выйти</a></li>
+                            </ul>
                         </li>
                     {% else %}
                         <li class="nav-item">

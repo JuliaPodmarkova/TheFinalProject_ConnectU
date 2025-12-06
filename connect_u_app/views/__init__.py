@@ -1,5 +1,4 @@
-# connect_u_app/views/__init__.py
-
-from . import pages
-from . import interactions
-from . import auth_views
+from .pages import *
+from .auth_views import *
+from .interactions import *
+from .actions import *

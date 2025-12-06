@@ -8,8 +8,8 @@ services:
       - "5435:5432"
 
   redis:
-    image: redis:7-alpine
-    restart: unless-stopped
+    image: "redis:alpine"
+    restart: always
 
   app:
     build: .

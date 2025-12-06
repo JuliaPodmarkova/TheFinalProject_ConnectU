@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.db.models import F, Q
 from django.http import HttpResponse
 
-from ..models import User, Like, Dislike, Match  # <- Добавили Match
+from ..models import User, Like, Dislike, Match, Photo
 
 
 @login_required
@@ -14,17 +14,13 @@ def like_user_view(request, user_id):
         current_user = request.user
         liked_user = get_object_or_404(User, id=user_id)
 
-        # Создаем лайк
         Like.objects.get_or_create(from_user=current_user, to_user=liked_user)
 
-        # Проверяем, случился ли мэтч
         if Like.objects.filter(from_user=liked_user, to_user=current_user).exists():
             user_a, user_b = sorted([current_user, liked_user], key=lambda u: u.id)
             match, created = Match.objects.get_or_create(user1=user_a, user2=user_b)
 
-            # Если мэтч только что создан и это HTMX-запрос
             if created and request.htmx:
-                # Создаем HTML-ответ с модальным окном
                 html = f"""
                 <div id="match-modal-content" hx-swap-oob="innerHTML">
                     <div class="modal-body text-center">
@@ -38,16 +34,13 @@ def like_user_view(request, user_id):
                     </div>
                 </div>
                 """
-                # Отправляем событие, чтобы JS показал модальное окно
                 response = HttpResponse(html)
                 response['HX-Trigger'] = 'showMatchModal'
                 return response
 
-        # Если это обычный HTMX-запрос без мэтча, возвращаем пустой ответ, чтобы карточка исчезла
         if request.htmx:
             return HttpResponse(status=200)
 
-    # Старая логика для обычных запросов
     return redirect(reverse('home'))
 
 
@@ -58,9 +51,31 @@ def dislike_user_view(request, user_id):
         disliked_user = get_object_or_404(User, id=user_id)
         Dislike.objects.get_or_create(from_user=current_user, to_user=disliked_user)
 
-        # Если это HTMX-запрос, возвращаем пустой ответ
         if request.htmx:
             return HttpResponse(status=200)
 
-    # Старая логика для обычных запросов
     return redirect(reverse('home'))
+
+@login_required
+def delete_photo_view(request, photo_id):
+    photo = get_object_or_404(Photo, id=photo_id, user=request.user)
+    if request.method == 'POST':
+        is_main = photo.is_main
+        photo.delete()
+        messages.success(request, 'Фотография удалена.')
+        if is_main:
+            new_main = request.user.photos.first()
+            if new_main:
+                new_main.is_main = True
+                new_main.save()
+    return redirect('profile_photos')
+
+@login_required
+def set_main_photo_view(request, photo_id):
+    photo = get_object_or_404(Photo, id=photo_id, user=request.user)
+    if request.method == 'POST':
+        request.user.photos.update(is_main=False)
+        photo.is_main = True
+        photo.save()
+        messages.success(request, 'Главное фото обновлено.')
+    return redirect('profile_photos')

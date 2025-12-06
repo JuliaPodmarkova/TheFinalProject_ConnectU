@@ -14,22 +14,18 @@ from ..forms import UserFilterForm
 def index(request):
     current_user = request.user
 
-    # Базовый набор пользователей: активные, не суперюзеры, доступные для поиска, и не сам текущий пользователь
     base_users = User.objects.filter(
         is_active=True,
         is_superuser=False,
         profile__searchable=True
     ).exclude(pk=current_user.pk).select_related('profile')
-
-    # Исключаем тех, с кем уже было взаимодействие (лайк/дизлайк)
-    # Используем твою существующую логику с моделями Like и Dislike
     liked_users_ids = list(Like.objects.filter(from_user=current_user).values_list('to_user_id', flat=True))
     disliked_users_ids = list(Dislike.objects.filter(from_user=current_user).values_list('to_user_id', flat=True))
     interacted_users_ids = set(liked_users_ids) | set(disliked_users_ids)
 
     recommended_users = base_users.exclude(id__in=interacted_users_ids)
 
-    # --- ЛОГИКА ФИЛЬТРАЦИИ ---
+
     filter_form = UserFilterForm(request.GET)
 
     if filter_form.is_valid():
@@ -53,12 +49,10 @@ def index(request):
             min_birth_date = today.replace(year=today.year - (max_age + 1))
             recommended_users = recommended_users.filter(birth_date__gte=min_birth_date)
 
-    # --- ПАГИНАЦИЯ ---
     paginator = Paginator(recommended_users.order_by('?'), 9)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # Сохраняем GET-параметры фильтров для корректной работы пагинации
     filter_params = request.GET.copy()
     if 'page' in filter_params:
         del filter_params['page']
@@ -75,7 +69,6 @@ def index(request):
 def profile_own_view(request):
     profile = get_object_or_404(UserProfile, user=request.user)
 
-    # Считаем лайки, дизлайки и мэтчи для текущего пользователя
     likes_given_count = Like.objects.filter(from_user=request.user).count()
     dislikes_given_count = Dislike.objects.filter(from_user=request.user).count()
     matches_count = Match.objects.filter(Q(user1=request.user) | Q(user2=request.user)).count()
@@ -195,7 +188,6 @@ def chat_view(request, match_id):
     if request.user != match.user1 and request.user != match.user2:
         return HttpResponseForbidden("У вас нет доступа к этому чату.")
 
-    # ВОТ ЭТА СТРОКА БЫЛА СЛОМАНА. ТЕПЕРЬ ОНА ИСПРАВЛЕНА.
     other_user = match.user2 if request.user == match.user1 else match.user1
 
     messages = match.messages.all().select_related('sender__profile')
@@ -212,14 +204,12 @@ def chat_view(request, match_id):
 def profile_view(request, user_id):
     """Отображает публичный профиль другого пользователя."""
 
-    # Нельзя смотреть свой же профиль по этому URL, для этого есть profile_own
     if request.user.id == user_id:
         return redirect('profile_own')
 
     viewed_user = get_object_or_404(User, id=user_id)
     profile = get_object_or_404(UserProfile, user=viewed_user)
 
-    # Проверяем, есть ли уже мэтч между пользователями
     is_match = Match.objects.filter(
         (Q(user1=request.user) & Q(user2=viewed_user)) |
         (Q(user1=viewed_user) & Q(user2=request.user))
@@ -230,3 +220,56 @@ def profile_view(request, user_id):
         'is_match': is_match,
     }
     return render(request, 'account/profile_public.html', context)
+
+@login_required
+def profile_edit_view(request):
+    user = request.user
+    profile = user.profile
+    if request.method == 'POST':
+        user_form = UserEditForm(request.POST, instance=user)
+        profile_form = UserProfileEditForm(request.POST, instance=profile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            saved_profile = profile_form.save(commit=False)
+            other_interests_str = profile_form.cleaned_data.get('other_interests', '')
+            if other_interests_str:
+                interest_names = [name.strip().capitalize() for name in other_interests_str.split(',') if name.strip()]
+                for name in interest_names:
+                    interest, _ = Interest.objects.get_or_create(name=name)
+                    saved_profile.interests.add(interest)
+            saved_profile.save()
+            profile_form.save_m2m() # Сохраняем many-to-many поля (интересы)
+            messages.success(request, 'Профиль успешно обновлен!')
+            return redirect('profile_edit')
+        else:
+            messages.error(request, 'Пожалуйста, исправьте ошибки в форме.')
+    else:
+        user_form = UserEditForm(instance=user)
+        profile_form = UserProfileEditForm(instance=profile)
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form,
+        'profile': profile,
+    }
+    return render(request, 'account/profile_edit.html', context)
+
+@login_required
+def profile_photos_view(request):
+    photos = request.user.photos.all()
+    if request.method == 'POST':
+        photo_form = PhotoForm(request.POST, request.FILES)
+        if photo_form.is_valid():
+            photo = photo_form.save(commit=False)
+            photo.user = request.user
+            if not photos.exists():
+                photo.is_main = True
+            photo.save()
+            messages.success(request, 'Фото успешно загружено!')
+            return redirect('profile_photos')
+    else:
+        photo_form = PhotoForm()
+    context = {
+        'photo_form': photo_form,
+        'photos': photos,
+    }
+    return render(request, 'account/profile_photos.html', context)

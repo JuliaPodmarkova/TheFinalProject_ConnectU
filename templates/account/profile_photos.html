@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Управление фотографиями | ConnectU{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h2 class="text-center mb-4">Редактирование профиля</h2>
+
+            <!-- ВКЛАДКИ (ТАБЫ) ДЛЯ НАВИГАЦИИ -->
+            <ul class="nav nav-tabs nav-fill mb-4">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'profile_edit' %}">Основная информация</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{% url 'profile_photos' %}">Управление фотографиями</a>
+                </li>
+            </ul>
+
+            <!-- Галерея -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3 fw-bold">Моя галерея</h5>
+                    <div class="row g-3">
+                        {% for photo in photos %}
+                        <div class="col-6 col-md-4">
+                            <div class="position-relative">
+                                <img src="{{ photo.image.url }}" class="img-fluid rounded border" alt="Фото" style="aspect-ratio: 1 / 1; object-fit: cover;">
+                                {% if photo.is_main %}
+                                    <span class="badge bg-primary position-absolute top-0 start-0 m-2">Главное фото</span>
+                                {% endif %}
+                                <div class="photo-actions position-absolute bottom-0 end-0 m-2 d-flex gap-1">
+                                    {% if not photo.is_main %}
+                                    <form action="{% url 'set_main_photo' photo.id %}" method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-light" title="Сделать главной">⭐</button>
+                                    </form>
+                                    {% endif %}
+                                    <form action="{% url 'delete_photo' photo.id %}" method="post" class="d-inline" onsubmit="return confirm('Вы уверены, что хотите удалить это фото?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Удалить">🗑️</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-12">
+                            <p class="text-muted text-center py-4">У вас пока нет фотографий. Загрузите первую!</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Форма загрузки -->
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3 fw-bold">➕ Загрузить новое фото</h5>
+                     <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            {{ photo_form.image }}
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" name="upload_photo" class="btn btn-primary">Загрузить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

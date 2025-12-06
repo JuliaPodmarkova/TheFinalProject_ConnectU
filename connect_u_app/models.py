@@ -52,7 +52,7 @@ class User(AbstractUser):
         if self.birth_date:
             today = timezone.now().date()
             return today.year - self.birth_date.year - (
-                        (today.month, today.day) < (self.birth_date.month, self.birth_date.day))
+                    (today.month, today.day) < (self.birth_date.month, self.birth_date.day))
         return None
 
     @property
@@ -62,45 +62,65 @@ class User(AbstractUser):
 
 # --- МОДЕЛЬ ИНТЕРЕСОВ ---
 class Interest(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100, unique=True, verbose_name="Название")
 
-    def __str__(self): return self.name
+    def __str__(self):
+        return self.name
 
-    class Meta: ordering = ['name']
+    class Meta:
+        ordering = ['name']
+        verbose_name = "Интерес"
+        verbose_name_plural = "Интересы"
 
 
 # --- ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ ---
+# ВОЗВРАЩЕНО НАЗВАНИЕ UserProfile
 class UserProfile(models.Model):
-    STATUS_CHOICES = [('searching', 'В поиске'), ('in_relationship', 'В отношениях'), ('not_specified', 'Не указано')]
+    STATUS_CHOICES = [
+        ('searching', 'В поиске'),
+        ('in_relationship', 'В отношениях'),
+        ('not_specified', 'Не указано')
+    ]
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
-    full_name = models.CharField(max_length=100, blank=True)
-    city = models.CharField(max_length=100, blank=True)
-    bio = models.TextField(blank=True)
-    avatar = models.ImageField(upload_to='avatars/', default='avatars/default.png', verbose_name="Аватар")
-    interests = models.ManyToManyField(Interest, blank=True)
+    full_name = models.CharField(max_length=100, blank=True, verbose_name="Полное имя")
+    city = models.CharField(max_length=100, blank=True, verbose_name="Город")
+    bio = models.TextField(blank=True, verbose_name="О себе")
+    interests = models.ManyToManyField(Interest, blank=True, verbose_name="Интересы")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_specified',
                               verbose_name="Статус отношений")
+    # Настройки приватности
     show_age = models.BooleanField(default=True, verbose_name="Показывать возраст в профиле")
     show_city = models.BooleanField(default=True, verbose_name="Показывать город в профиле")
     searchable = models.BooleanField(default=True, verbose_name="Разрешить находить мой профиль в поиске")
 
-    def __str__(self): return self.full_name or self.user.email
+    def __str__(self):
+        return self.full_name or self.user.email
 
-    @property
+    # Метод для получения аватара остался, но теперь он часть UserProfile
     def get_avatar_url(self):
-        if self.avatar and hasattr(self.avatar, 'url'): return self.avatar.url
+        main_photo = self.user.photos.filter(is_main=True).first()
+        if main_photo and main_photo.image and hasattr(main_photo.image, 'url'):
+            return main_photo.image.url
+        first_photo = self.user.photos.first()
+        if first_photo and first_photo.image and hasattr(first_photo.image, 'url'):
+            return first_photo.image.url
         return settings.STATIC_URL + 'images/default_avatar.png'
+
+    class Meta:
+        verbose_name = "Профиль"
+        verbose_name_plural = "Профили"
 
 
 # --- ФОТОГРАФИИ В ГАЛЕРЕЕ ---
-def user_photos_path(instance, filename): return f'user_{instance.user.id}/{filename}'
+def user_photos_path(instance, filename):
+    return f'user_{instance.user.id}/{filename}'
 
 
 class Photo(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='photos')
-    image = models.ImageField(upload_to=user_photos_path)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='photos', verbose_name="Пользователь")
+    image = models.ImageField(upload_to=user_photos_path, verbose_name="Изображение")
     is_main = models.BooleanField(default=False, verbose_name="Главное фото")
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата загрузки")
 
     def save(self, *args, **kwargs):
         if self.image:
@@ -109,13 +129,22 @@ class Photo(models.Model):
             if pil_img.width > max_width or pil_img.height > max_height:
                 pil_img.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
                 in_mem_file = BytesIO()
-                if pil_img.mode in ("RGBA", "P"): pil_img = pil_img.convert("RGB")
+                if pil_img.mode in ("RGBA", "P"):
+                    pil_img = pil_img.convert("RGB")
                 pil_img.save(in_mem_file, format='JPEG', quality=90)
                 in_mem_file.seek(0)
                 original_name, _ = self.image.name.rsplit('.', 1)
                 new_name = f"{original_name}.jpg"
                 self.image = File(in_mem_file, name=new_name)
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Фото для {self.user.email}"
+
+    class Meta:
+        ordering = ['-uploaded_at']
+        verbose_name = "Фотография"
+        verbose_name_plural = "Фотографии"
 
 
 # --- ЛАЙКИ И ДИЗЛАЙКИ ---
@@ -124,7 +153,11 @@ class Like(models.Model):
     to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes_received')
     created_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta: unique_together = ('from_user', 'to_user')
+    class Meta:
+        unique_together = ('from_user', 'to_user')
+        ordering = ['-created_at']
+        verbose_name = "Лайк"
+        verbose_name_plural = "Лайки"
 
 
 class Dislike(models.Model):
@@ -132,7 +165,11 @@ class Dislike(models.Model):
     to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dislikes_received')
     created_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta: unique_together = ('from_user', 'to_user')
+    class Meta:
+        unique_together = ('from_user', 'to_user')
+        ordering = ['-created_at']
+        verbose_name = "Дизлайк"
+        verbose_name_plural = "Дизлайки"
 
 
 # --- МЭТЧИ И СООБЩЕНИЯ ---
@@ -146,6 +183,8 @@ class Match(models.Model):
             models.UniqueConstraint(fields=['user1', 'user2'], name='unique_match'),
             CheckConstraint(check=~Q(user1=F('user2')), name='users_cannot_be_the_same'),
         ]
+        verbose_name = "Мэтч"
+        verbose_name_plural = "Мэтчи"
 
     def __str__(self): return f"Match between {self.user1.email} and {self.user2.email}"
 
@@ -156,10 +195,18 @@ class Message(models.Model):
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    class Meta: ordering = ['timestamp']
+    class Meta:
+        ordering = ['timestamp']
+        verbose_name = "Сообщение"
+        verbose_name_plural = "Сообщения"
+
+    def get_formatted_timestamp(self):
+        """Форматирует timestamp в локальное время, например '14:30'"""
+        local_time = timezone.localtime(self.timestamp)
+        return local_time.strftime('%H:%M')
 
 
-# --- ВЗАИМОДЕЙСТВИЯ (ВОЗВРАЩЕНА) ---
+# --- ВЗАИМОДЕЙСТВИЯ ---
 class Interaction(models.Model):
     REACTION_CHOICES = (('like', 'Like'), ('dislike', 'Dislike'))
     from_user = models.ForeignKey(User, related_name='interactions_from', on_delete=models.CASCADE)
@@ -167,30 +214,31 @@ class Interaction(models.Model):
     reaction = models.CharField(max_length=10, choices=REACTION_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta: unique_together = ('from_user', 'to_user')
+    class Meta:
+        unique_together = ('from_user', 'to_user')
+        verbose_name = "Взаимодействие"
+        verbose_name_plural = "Взаимодействия"
 
     def __str__(self): return f'{self.from_user.username} -> {self.to_user.username}: {self.reaction}'
 
 
 # --- СИГНАЛЫ ---
-
 @receiver(post_save, sender=User)
 def create_or_update_user_profile(sender, instance, created, **kwargs):
-    if created: UserProfile.objects.create(user=instance, full_name=instance.username.split('@')[0])
-    if hasattr(instance, 'profile'): instance.profile.save()
+    if created:
+        # ВОЗВРАЩЕНО ИМЯ UserProfile
+        UserProfile.objects.create(user=instance, full_name=instance.username.split('@')[0])
+    if hasattr(instance, 'profile'):
+        instance.profile.save()
 
 
 @receiver(post_save, sender=Photo)
-def ensure_single_main_photo(sender, instance, created, **kwargs):
+def ensure_single_main_photo(sender, instance, **kwargs):
     if instance.is_main:
         Photo.objects.filter(user=instance.user).exclude(pk=instance.pk).update(is_main=False)
-        profile = instance.user.profile
-        if profile.avatar != instance.image:
-            profile.avatar = instance.image
-            profile.save()
 
 
-# НОВОЕ: Сигналы для синхронизации Like/Dislike с Interaction
+# --- Сигналы для синхронизации с Interaction ---
 @receiver(post_save, sender=Like)
 def sync_like_to_interaction(sender, instance, created, **kwargs):
     Interaction.objects.update_or_create(

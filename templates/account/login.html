@@ -1,5 +1,7 @@
 <!-- templates/account/login.html -->
 {% extends "base.html" %}
+{% load static %}
+{% load socialaccount %}
 
 {% block title %}Вход | ConnectU{% endblock %}
 
@@ -12,100 +14,123 @@
                     <h2 class="card-title text-center mb-2">Вход в ConnectU</h2>
                     <p class="text-center text-muted mb-4">Найдите свою пару уже сегодня!</p>
 
-                    <!--
-                        ВАЖНО: Форма и её элементы сохранили свои ID,
-                        чтобы твой JavaScript-обработчик продолжал работать.
-                    -->
-                    <form id="login-form" method="post" action="{% url 'login' %}">
+                    <form id="login-form" method="post" action="{% url 'account_login' %}">
                         {% csrf_token %}
 
-                        <!-- Блок для ошибок от Django (если JS отключен) -->
+                        <!-- Блок для общих ошибок формы -->
                         {% if form.non_field_errors %}
-                            <div class="alert alert-danger">
+                            <div class="alert alert-danger p-2 text-center" role="alert">
                                 {% for error in form.non_field_errors %}
-                                    <p class="mb-0">{{ error }}</p>
+                                    <small>{{ error }}</small>
                                 {% endfor %}
                             </div>
                         {% endif %}
 
-                        <!-- Поле Email/Логин -->
+                        <!-- Поле Email -->
                         <div class="mb-3">
-                            <label for="id_username" class="form-label">Email или Логин</label>
-                            <input type="text" name="username" class="form-control" id="id_username" required>
+                            <label for="{{ form.login.id_for_label }}" class="form-label">Email</label>
+                            <input
+                                type="email"
+                                name="{{ form.login.name }}"
+                                class="form-control {% if form.login.errors %}is-invalid{% endif %}"
+                                id="{{ form.login.id_for_label }}"
+                                required
+                            >
+                            {% if form.login.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.login.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
 
                         <!-- Поле Пароль -->
                         <div class="mb-3">
-                            <label for="id_password" class="form-label">Пароль</label>
-                            <input type="password" name="password" class="form-control" id="id_password" required>
+                            <label for="{{ form.password.id_for_label }}" class="form-label">Пароль</label>
+                            <input
+                                type="password"
+                                name="{{ form.password.name }}"
+                                class="form-control {% if form.password.errors %}is-invalid{% endif %}"
+                                id="{{ form.password.id_for_label }}"
+                                required
+                            >
+                             {% if form.password.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.password.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
 
-                        <!--
-                            Блок для ошибок от JavaScript.
-                            Скрыт по умолчанию, появляется при ошибке.
-                        -->
-                        <div id="error-message" class="alert alert-danger mt-3" style="display: none;"></div>
-
                         <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-danger btn-lg">Войти</button>
+                            <button type="submit" class="btn btn-primary btn-lg">Войти</button>
                         </div>
                     </form>
 
-                    <hr class="my-4">
+                    <div class="d-flex align-items-center my-3">
+                        <hr class="flex-grow-1">
+                        <span class="px-3 text-muted">ИЛИ</span>
+                        <hr class="flex-grow-1">
+                    </div>
 
-                    <div class="text-center">
-                        <small class="text-muted">Нет аккаунта? <a href="{% url 'signup' %}" class="link-danger">Зарегистрироваться</a></small>
+                    <!-- ============================================= -->
+                    <!-- == ИЗМЕНЕНИЯ ЗДЕСЬ == -->
+                    <!-- ============================================= -->
+                    <div class="d-grid">
+                        <!-- Меняем href на onclick, чтобы вызвать наш JavaScript -->
+                        <a href="javascript:void(0);"
+                           onclick="openGoogleLoginPopup('{% provider_login_url 'google' process='login' %}')"
+                           class="btn btn-danger">
+                            <i class="fab fa-google me-2"></i> <!-- Иконка Google из Font Awesome -->
+                            Войти через Google
+                        </a>
+                    </div>
+                    <!-- ============================================= -->
+                    <!-- == КОНЕЦ ИЗМЕНЕНИЙ == -->
+                    <!-- ============================================= -->
+
+                    <div class="text-center mt-4">
+                        <small class="text-muted">Нет аккаунта? <a href="{% url 'account_signup' %}" class="link-primary">Зарегистрироваться</a></small>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
+<!-- ============================================= -->
+<!-- == ДОБАВЛЕН JAVASCRIPT ДЛЯ POPUP-ОКНА == -->
+<!-- ============================================= -->
 <script>
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-        e.preventDefault(); // Предотвращаем стандартную отправку формы
+function openGoogleLoginPopup(url) {
+    // Задаем размеры и позицию для всплывающего окна
+    const width = 600, height = 700;
+    const left = (screen.width / 2) - (width / 2);
+    const top = (screen.height / 2) - (height / 2);
 
-        const form = e.target;
-        const emailInput = document.getElementById('id_username');
-        const passwordInput = document.getElementById('id_password');
-        const errorMessageDiv = document.getElementById('error-message');
+    // Открываем окно аутентификации Google
+    const loginWindow = window.open(
+        url,
+        'googleLogin',
+        `width=${width},height=${height},top=${top},left=${left},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`
+    );
 
-        // Сбрасываем предыдущие ошибки
-        errorMessageDiv.textContent = '';
-        errorMessageDiv.style.display = 'none';
+    // Устанавливаем фокус на новое окно
+    if (window.focus) {
+        loginWindow.focus();
+    }
 
-        try {
-            // ИЗМЕНЕНИЕ: Возвращаем прямой URL, который у тебя был
-            const response = await fetch('/api/v1/auth/jwt/create/', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    email: emailInput.value,
-                    password: passwordInput.value
-                })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                // Если успешно, сохраняем токены и перенаправляем
-                localStorage.setItem('access', data.access);
-                localStorage.setItem('refresh', data.refresh);
-                window.location.href = '/'; // Перенаправление на главную
-            } else {
-                // Показываем ошибку в нашем блоке
-                const errorText = data.detail || 'Неверный email или пароль.';
-                errorMessageDiv.textContent = errorText;
-                errorMessageDiv.style.display = 'block';
-            }
-        } catch (error) {
-            errorMessageDiv.textContent = 'Произошла ошибка сети. Пожалуйста, попробуйте позже.';
-            errorMessageDiv.style.display = 'block';
+    // Периодически проверяем, не закрыл ли пользователь окно
+    const timer = setInterval(() => {
+        // Если окно было закрыто, а пользователь не вошел, останавливаем проверку
+        if (loginWindow.closed) {
+            clearInterval(timer);
+            // Можно добавить сюда сообщение для пользователя, если он просто закрыл окно,
+            // но пока что просто ничего не делаем.
+            // Можно также перезагрузить страницу, чтобы обновить CSRF-токен:
+            // window.location.reload();
         }
-    });
+    }, 1000);
+}
 </script>
 {% endblock %}

@@ -4,6 +4,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from ..models import User
 from ..forms import UserRegistrationForm
+from django.shortcuts import render
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -47,3 +48,10 @@ def register_view(request):
         form = UserRegistrationForm()
 
     return render(request, 'account/signup.html', {'form': form})
+
+def google_login_callback_view(request):
+    """
+    Эта вьюха рендерит шаблон, который закроет popup-окно
+    и перезагрузит родительскую страницу.
+    """
+    return render(request, 'account/google_login_callback.html')

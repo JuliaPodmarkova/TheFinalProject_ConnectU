@@ -3,6 +3,7 @@ from .models import UserProfile
 from .serializers import ProfileSerializer
 
 
+
 class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API эндпоинт, который позволяет просматривать профили пользователей.
@@ -15,3 +16,4 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
 
     serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
+

@@ -190,25 +190,28 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
-AUTHENTICATION_BACKENDS = (
-    'social_core.backends.google.GoogleOAuth2',
-    'social_core.backends.facebook.FacebookOAuth2',
+
+AUTHENTICATION_BACKENDS = [
+    # Нужен для входа в админку Django по username
     'django.contrib.auth.backends.ModelBackend',
+    # Нужен для аутентификации allauth (логин по email, соцсети)
     'allauth.account.auth_backends.AuthenticationBackend',
-)
+]
 
 SITE_ID = 1
+
+# URL-адреса для перенаправления после входа/выхода
 LOGIN_REDIRECT_URL = '/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 
-# Настройки для allauth
-ACCOUNT_SESSION_REMEMBER = True
-ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_LOGIN_METHOD = 'email'
-ACCOUNT_EMAIL_REQUIRED = True
-SOCIALACCOUNT_AUTO_SIGNUP = True
+# Эти настройки решают и КРИТИЧЕСКУЮ ОШИБКУ, и все ПРЕДУПРЕЖДЕНИЯ
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None  # Говорим allauth, что поля 'username' у нас нет
+ACCOUNT_USERNAME_REQUIRED = False         # И оно не требуется при регистрации
+ACCOUNT_AUTHENTICATION_METHOD = 'email'   # Метод входа - по email
+ACCOUNT_EMAIL_REQUIRED = True             # Email обязателен для любой регистрации
+ACCOUNT_UNIQUE_EMAIL = True               # Email должен быть уникальным
+ACCOUNT_EMAIL_VERIFICATION = 'none'       # Пока отключаем подтверждение по email для простоты разработки
+SOCIALACCOUNT_AUTO_SIGNUP = True          # Автоматическая регистрация через соцсети
 
 # Настройки для провайдера Google
 SOCIALACCOUNT_PROVIDERS = {

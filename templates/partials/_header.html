@@ -37,17 +37,17 @@
                                 <li><a class="dropdown-item" href="{% url 'profile_own' %}">🧐 Мой профиль</a></li>
                                 <li><a class="dropdown-item" href="{% url 'profile_edit' %}">✏️ Редактировать</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'logout' %}">🚪 Выйти</a></li>
+                                <li><a class="dropdown-item" href="{% url 'account_logout' %}">🚪 Выйти</a></li>
                             </ul>
                         </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Войти</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'signup' %}">Регистрация</a>
-                        </li>
-                    {% endif %}
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'account_login' %}">Войти</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'account_signup' %}">Регистрация</a>
+                            </li>
+                        {% endif %}
                 </ul>
             </div>
         </div>

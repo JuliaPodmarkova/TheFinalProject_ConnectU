@@ -9,7 +9,7 @@ urlpatterns = [
     path('next/', interactions.show_next_user_view, name='show_next_user'),  # Для HTMX/AJAX?
 
     path('signup/', auth_views.register_view, name='signup'),
-    path('login/', auth_views.login_view, name='login'),
+    #path('login/', auth_views.login_view, name='login'),
     path('logout/', auth_views.logout_view, name='logout'),
 
     path('profile/', pages.profile_own_view, name='profile_own'),  # Просмотр своего профиля
@@ -27,10 +27,11 @@ urlpatterns = [
     path('chat/<int:match_id>/', pages.chat_view, name='chat'),
 
     path('gallery/', pages.photo_gallery_view, name='photo_gallery'),
+    path('accounts/google/login/callback/', auth_views.google_login_callback_view, name='google_callback'),
 
-    path('accounts/login/', RedirectView.as_view(url='/login/', permanent=False)),
-    path('accounts/logout/', RedirectView.as_view(url='/logout/', permanent=False)),
-    path('accounts/signup/', RedirectView.as_view(url='/signup/', permanent=False)),
+    #path('accounts/login/', RedirectView.as_view(url='/login/', permanent=False)),
+    #path('accounts/logout/', RedirectView.as_view(url='/logout/', permanent=False)),
+    #path('accounts/signup/', RedirectView.as_view(url='/signup/', permanent=False)),
 
     path('api/v1/auth/jwt/create/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/v1/auth/jwt/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

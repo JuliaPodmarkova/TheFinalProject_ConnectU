@@ -1,23 +1,21 @@
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
-from django.db.models import Q, F, CheckConstraint
-from django.db.models.signals import post_save, post_delete
+from django.db.models import CheckConstraint, F, Q
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.core.files import File
 from PIL import Image
 from io import BytesIO
+from django.core.files import File
 
 
-# --- МЕНЕДЖЕР ДЛЯ ПРОДВИНУТОЙ МОДЕЛИ USER ---
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, password, **extra_fields):
+    def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError(_('Поле Email должно быть заполнено'))
         email = self.normalize_email(email)
-        extra_fields.setdefault('username', email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -27,21 +25,32 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
+
         if extra_fields.get('is_staff') is not True:
             raise ValueError(_('Superuser must have is_staff=True.'))
         if extra_fields.get('is_superuser') is not True:
             raise ValueError(_('Superuser must have is_superuser=True.'))
+
         return self.create_user(email, password, **extra_fields)
 
 
-# --- ПРОДВИНУТАЯ МОДЕЛЬ USER ---
-class User(AbstractUser):
+class User(AbstractBaseUser, PermissionsMixin):
     GENDER_CHOICES = (('M', 'Мужчина'), ('F', 'Женщина'))
+
     email = models.EmailField(_('email address'), unique=True)
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
-    birth_date = models.DateField(null=True, blank=True)
+    first_name = models.CharField(_('first name'), max_length=150, blank=True)
+    last_name = models.CharField(_('last name'), max_length=150, blank=True)
+
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, verbose_name='Пол', null=True, blank=True)
+    birth_date = models.DateField(verbose_name='Дата рождения', null=True, blank=True)
+
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    date_joined = models.DateTimeField(default=timezone.now)
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+
     objects = CustomUserManager()
 
     def __str__(self):
@@ -52,7 +61,7 @@ class User(AbstractUser):
         if self.birth_date:
             today = timezone.now().date()
             return today.year - self.birth_date.year - (
-                    (today.month, today.day) < (self.birth_date.month, self.birth_date.day))
+                        (today.month, today.day) < (self.birth_date.month, self.birth_date.day))
         return None
 
     @property
@@ -60,7 +69,6 @@ class User(AbstractUser):
         return self.likes_received.count()
 
 
-# --- МОДЕЛЬ ИНТЕРЕСОВ ---
 class Interest(models.Model):
     name = models.CharField(max_length=100, unique=True, verbose_name="Название")
 
@@ -73,8 +81,6 @@ class Interest(models.Model):
         verbose_name_plural = "Интересы"
 
 
-# --- ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ ---
-# ВОЗВРАЩЕНО НАЗВАНИЕ UserProfile
 class UserProfile(models.Model):
     STATUS_CHOICES = [
         ('searching', 'В поиске'),
@@ -88,7 +94,12 @@ class UserProfile(models.Model):
     interests = models.ManyToManyField(Interest, blank=True, verbose_name="Интересы")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_specified',
                               verbose_name="Статус отношений")
-    # Настройки приватности
+    search_gender = models.CharField(max_length=1, choices=User.GENDER_CHOICES, blank=True, null=True,
+                                     verbose_name="Искать пол")
+    search_min_age = models.PositiveSmallIntegerField(null=True, blank=True, default=18,
+                                                      verbose_name="Минимальный возраст для поиска")
+    search_max_age = models.PositiveSmallIntegerField(null=True, blank=True, default=99,
+                                                      verbose_name="Максимальный возраст для поиска")
     show_age = models.BooleanField(default=True, verbose_name="Показывать возраст в профиле")
     show_city = models.BooleanField(default=True, verbose_name="Показывать город в профиле")
     searchable = models.BooleanField(default=True, verbose_name="Разрешить находить мой профиль в поиске")
@@ -96,7 +107,6 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.full_name or self.user.email
 
-    # Метод для получения аватара остался, но теперь он часть UserProfile
     def get_avatar_url(self):
         main_photo = self.user.photos.filter(is_main=True).first()
         if main_photo and main_photo.image and hasattr(main_photo.image, 'url'):
@@ -111,7 +121,6 @@ class UserProfile(models.Model):
         verbose_name_plural = "Профили"
 
 
-# --- ФОТОГРАФИИ В ГАЛЕРЕЕ ---
 def user_photos_path(instance, filename):
     return f'user_{instance.user.id}/{filename}'
 
@@ -123,7 +132,7 @@ class Photo(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата загрузки")
 
     def save(self, *args, **kwargs):
-        if self.image:
+        if self.image and hasattr(self.image, 'file'):
             pil_img = Image.open(self.image)
             max_width, max_height = 1024, 1024
             if pil_img.width > max_width or pil_img.height > max_height:
@@ -147,7 +156,6 @@ class Photo(models.Model):
         verbose_name_plural = "Фотографии"
 
 
-# --- ЛАЙКИ И ДИЗЛАЙКИ ---
 class Like(models.Model):
     from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes_given')
     to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes_received')
@@ -172,7 +180,6 @@ class Dislike(models.Model):
         verbose_name_plural = "Дизлайки"
 
 
-# --- МЭТЧИ И СООБЩЕНИЯ ---
 class Match(models.Model):
     user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='matches_user1')
     user2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='matches_user2')
@@ -201,12 +208,10 @@ class Message(models.Model):
         verbose_name_plural = "Сообщения"
 
     def get_formatted_timestamp(self):
-        """Форматирует timestamp в локальное время, например '14:30'"""
         local_time = timezone.localtime(self.timestamp)
         return local_time.strftime('%H:%M')
 
 
-# --- ВЗАИМОДЕЙСТВИЯ ---
 class Interaction(models.Model):
     REACTION_CHOICES = (('like', 'Like'), ('dislike', 'Dislike'))
     from_user = models.ForeignKey(User, related_name='interactions_from', on_delete=models.CASCADE)
@@ -219,15 +224,14 @@ class Interaction(models.Model):
         verbose_name = "Взаимодействие"
         verbose_name_plural = "Взаимодействия"
 
-    def __str__(self): return f'{self.from_user.username} -> {self.to_user.username}: {self.reaction}'
+    def __str__(self): return f'{self.from_user.email} -> {self.to_user.email}: {self.reaction}'
 
 
-# --- СИГНАЛЫ ---
 @receiver(post_save, sender=User)
 def create_or_update_user_profile(sender, instance, created, **kwargs):
     if created:
-        # ВОЗВРАЩЕНО ИМЯ UserProfile
-        UserProfile.objects.create(user=instance, full_name=instance.username.split('@')[0])
+        if not hasattr(instance, 'profile'):
+            UserProfile.objects.create(user=instance)
     if hasattr(instance, 'profile'):
         instance.profile.save()
 
@@ -238,12 +242,10 @@ def ensure_single_main_photo(sender, instance, **kwargs):
         Photo.objects.filter(user=instance.user).exclude(pk=instance.pk).update(is_main=False)
 
 
-# --- Сигналы для синхронизации с Interaction ---
 @receiver(post_save, sender=Like)
 def sync_like_to_interaction(sender, instance, created, **kwargs):
     Interaction.objects.update_or_create(
-        from_user=instance.from_user,
-        to_user=instance.to_user,
+        from_user=instance.from_user, to_user=instance.to_user,
         defaults={'reaction': 'like', 'created_at': instance.created_at}
     )
 
@@ -251,8 +253,7 @@ def sync_like_to_interaction(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Dislike)
 def sync_dislike_to_interaction(sender, instance, created, **kwargs):
     Interaction.objects.update_or_create(
-        from_user=instance.from_user,
-        to_user=instance.to_user,
+        from_user=instance.from_user, to_user=instance.to_user,
         defaults={'reaction': 'dislike', 'created_at': instance.created_at}
     )
 

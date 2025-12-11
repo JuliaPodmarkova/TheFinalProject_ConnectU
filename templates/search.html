@@ -6,7 +6,6 @@
 <div class="container mt-4">
     <h2 class="mb-4">Поиск пользователей</h2>
 
-    <!-- Форма поиска -->
     <form method="get" action="{% url 'search' %}" class="mb-5">
         <div class="input-group">
             <input type="text" name="q" class="form-control" placeholder="Введите имя для поиска..." value="{{ query|default:'' }}">
@@ -14,7 +13,6 @@
         </div>
     </form>
 
-    <!-- Результаты поиска -->
     {% if query %}
         <h4 class="mb-3">Результаты по запросу: "{{ query }}"</h4>
 
@@ -27,7 +25,6 @@
                             <div class="card-body">
                                 <h5 class="card-title">{{ profile.full_name }}, {{ profile.age }}</h5>
                                 <p class="card-text text-muted">{{ profile.city }}</p>
-                                <!-- Можно добавить кнопку "Посмотреть профиль", если у вас есть публичные профили -->
                             </div>
                         </div>
                     </div>

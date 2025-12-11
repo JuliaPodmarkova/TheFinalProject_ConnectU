@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Поиск | ConnectU{% endblock %}
+
+{% block content %}
+<div class="container-fluid d-flex flex-column align-items-center justify-content-center" style="min-height: calc(100vh - 80px);">
+
+    {# Этот контейнер будет целью для обновлений от HTMX #}
+    <div id="swipe-card-container">
+        {% include 'swipe/card.html' with candidate=candidate %}
+    </div>
+
+</div>
+
+<div class="modal fade" id="matchModal" tabindex="-1" aria-labelledby="matchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center" style="background: linear-gradient(45deg, #ff8a80, #ff4081); border: none; color: white;">
+            <div class="modal-body p-4">
+                <h2 class="modal-title" id="matchModalLabel" style="font-weight: 700;">Это мэтч! ❤️</h2>
+                <p class="lead mt-3">Вы и <strong id="matchName"></strong> понравились друг другу.</p>
+                <img id="matchAvatar" src="" class="rounded-circle my-3" alt="avatar" width="120" height="120" style="border: 4px solid white; object-fit: cover;">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'match_list' %}" class="btn btn-light btn-lg">Написать сообщение</a>
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Продолжить поиск</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+    document.body.addEventListener('matchOccurred', function(event) {
+
+        const matchData = event.detail;
+        console.log("Match data received:", matchData);
+
+        document.getElementById('matchName').textContent = matchData.matchName;
+        document.getElementById('matchAvatar').src = matchData.matchAvatarUrl;
+
+        const matchModal = new bootstrap.Modal(document.getElementById('matchModal'));
+        matchModal.show();
+    });
+</script>
+{% endblock %}

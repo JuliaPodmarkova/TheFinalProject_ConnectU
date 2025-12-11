@@ -1,4 +1,3 @@
-<!-- templates/account/login.html -->
 {% extends "base.html" %}
 {% load static %}
 {% load socialaccount %}
@@ -17,7 +16,6 @@
                     <form id="login-form" method="post" action="{% url 'account_login' %}">
                         {% csrf_token %}
 
-                        <!-- Блок для общих ошибок формы -->
                         {% if form.non_field_errors %}
                             <div class="alert alert-danger p-2 text-center" role="alert">
                                 {% for error in form.non_field_errors %}
@@ -26,7 +24,6 @@
                             </div>
                         {% endif %}
 
-                        <!-- Поле Email -->
                         <div class="mb-3">
                             <label for="{{ form.login.id_for_label }}" class="form-label">Email</label>
                             <input
@@ -43,7 +40,6 @@
                             {% endif %}
                         </div>
 
-                        <!-- Поле Пароль -->
                         <div class="mb-3">
                             <label for="{{ form.password.id_for_label }}" class="form-label">Пароль</label>
                             <input
@@ -71,11 +67,7 @@
                         <hr class="flex-grow-1">
                     </div>
 
-                    <!-- ============================================= -->
-                    <!-- == ИЗМЕНЕНИЯ ЗДЕСЬ == -->
-                    <!-- ============================================= -->
                     <div class="d-grid">
-                        <!-- Меняем href на onclick, чтобы вызвать наш JavaScript -->
                         <a href="javascript:void(0);"
                            onclick="openGoogleLoginPopup('{% provider_login_url 'google' process='login' %}')"
                            class="btn btn-danger">
@@ -83,9 +75,6 @@
                             Войти через Google
                         </a>
                     </div>
-                    <!-- ============================================= -->
-                    <!-- == КОНЕЦ ИЗМЕНЕНИЙ == -->
-                    <!-- ============================================= -->
 
                     <div class="text-center mt-4">
                         <small class="text-muted">Нет аккаунта? <a href="{% url 'account_signup' %}" class="link-primary">Зарегистрироваться</a></small>
@@ -98,36 +87,27 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- ============================================= -->
-<!-- == ДОБАВЛЕН JAVASCRIPT ДЛЯ POPUP-ОКНА == -->
-<!-- ============================================= -->
+
 <script>
 function openGoogleLoginPopup(url) {
-    // Задаем размеры и позицию для всплывающего окна
     const width = 600, height = 700;
     const left = (screen.width / 2) - (width / 2);
     const top = (screen.height / 2) - (height / 2);
 
-    // Открываем окно аутентификации Google
     const loginWindow = window.open(
         url,
         'googleLogin',
         `width=${width},height=${height},top=${top},left=${left},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`
     );
 
-    // Устанавливаем фокус на новое окно
     if (window.focus) {
         loginWindow.focus();
     }
 
-    // Периодически проверяем, не закрыл ли пользователь окно
     const timer = setInterval(() => {
-        // Если окно было закрыто, а пользователь не вошел, останавливаем проверку
         if (loginWindow.closed) {
             clearInterval(timer);
-            // Можно добавить сюда сообщение для пользователя, если он просто закрыл окно,
-            // но пока что просто ничего не делаем.
-            // Можно также перезагрузить страницу, чтобы обновить CSRF-токен:
+
             // window.location.reload();
         }
     }, 1000);

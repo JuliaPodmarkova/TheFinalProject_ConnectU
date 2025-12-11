@@ -5,10 +5,7 @@ from .serializers import ProfileSerializer
 
 
 class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    API эндпоинт, который позволяет просматривать профили пользователей.
-    Доступно только чтение (GET-запросы).
-    """
+
     queryset = UserProfile.objects.filter(
         searchable=True,
         user__is_active=True

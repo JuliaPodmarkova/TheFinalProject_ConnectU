@@ -1,4 +1,3 @@
-<!-- templates/account/signup.html -->
 {% extends "base.html" %}
 
 {% block title %}Регистрация | ConnectU{% endblock %}
@@ -26,7 +25,6 @@
                         {% for field in form %}
                             <div class="mb-3">
                                 <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                <!-- Django сам подставит <input> с нужными атрибутами -->
                                 {{ field }}
                                 {% if field.help_text %}
                                     <small class="form-text text-muted">{{ field.help_text|safe }}</small>
@@ -40,7 +38,6 @@
                         {% endfor %}
 
                         <div class="d-grid mt-4">
-                            <!-- ИЗМЕНЕНИЕ: btn-primary -> btn-danger -->
                             <button type="submit" class="btn btn-danger btn-lg">Зарегистрироваться</button>
                         </div>
                     </form>

@@ -8,30 +8,30 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home' %}">Лента</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Лента</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'match_list' %}">Мои мэтчи</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'swipe' %}active{% endif %}" href="{% url 'swipe' %}">Знакомства</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'match_list' %}">Сообщения</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'match_list' %}active{% endif %}" href="{% url 'match_list' %}">Мои мэтчи</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'match_list' %}active{% endif %}" href="{% url 'match_list' %}">Сообщения</a>
                     </li>
                 </ul>
 
                 <form class="d-flex me-3" action="{% url 'search' %}" method="get">
-                    <input class="form-control me-2" type="search" name="q" placeholder="Поиск" aria-label="Search">
+                    <input class="form-control me-2" type="search" name="q" placeholder="Найти по имени..." aria-label="Search">
                     <button class="btn btn-outline-primary" type="submit">🔍</button>
                 </form>
 
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
-
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-
                                 <img src="{{ user.profile.get_avatar_url }}" alt="avatar" class="rounded-circle me-2" width="30" height="30" style="object-fit: cover;">
-
-                                {{ user.profile.full_name|default:user.username }}
+                                {{ user.profile.full_name|default:user.email }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                 <li><a class="dropdown-item" href="{% url 'profile_own' %}">🧐 Мой профиль</a></li>
@@ -40,14 +40,14 @@
                                 <li><a class="dropdown-item" href="{% url 'account_logout' %}">🚪 Выйти</a></li>
                             </ul>
                         </li>
-                        {% else %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'account_login' %}">Войти</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'account_signup' %}">Регистрация</a>
-                            </li>
-                        {% endif %}
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'account_login' %}">Войти</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'account_signup' %}">Регистрация</a>
+                        </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>

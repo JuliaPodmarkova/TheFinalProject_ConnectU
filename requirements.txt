@@ -20,3 +20,4 @@ django-jazzmin
 tqdm
 django-widget-tweaks
 django-allauth>=0.58.2
+python-dateutil

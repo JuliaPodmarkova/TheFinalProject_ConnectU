@@ -18,8 +18,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except Match.DoesNotExist:
             return None
 
-    # --- ИЗМЕНЕНИЯ ЗДЕСЬ ---
-    # Теперь метод создает сообщение и сразу возвращает словарь с данными
     @database_sync_to_async
     def create_message_and_get_data(self, content):
         new_message = Message.objects.create(
@@ -27,14 +25,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
             sender=self.user,
             content=content
         )
-        # Получаем все нужные данные здесь, в синхронном контексте
+
         return {
             'content': new_message.content,
             'timestamp': new_message.get_formatted_timestamp(),
             'sender_name': self.user.profile.full_name,  # Заодно и имя получим здесь же
         }
 
-    # Метод get_sender_name больше не нужен, но пусть пока останется на всякий случай
     @database_sync_to_async
     def get_sender_name(self):
         return self.user.profile.full_name

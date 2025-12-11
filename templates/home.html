@@ -6,7 +6,6 @@
 {% block content %}
 <div class="container mt-4">
     <div class="row">
-        <!-- Левая колонка для фильтров -->
         <div class="col-lg-3">
             <div class="card shadow-sm sticky-top" style="top: 20px;">
                 <div class="card-header">
@@ -40,14 +39,13 @@
             </div>
         </div>
 
-        <!-- Правая колонка для анкет -->
         <div class="col-lg-9">
             {% if page_obj %}
                 <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
 
 
         {% for user_obj in page_obj %}
-            <div class="col user-card-wrapper"> <!-- Обертка для плавного исчезновения -->
+            <div class="col user-card-wrapper">
                 <div class="card h-100 shadow-sm user-card">
                     <a href="{% url 'profile_view' user_obj.id %}">
                         <img src="{{ user_obj.profile.get_avatar_url }}" class="card-img-top" alt="{{ user_obj.profile.full_name }}">
@@ -86,7 +84,6 @@
             </div>
         {% endfor %}
 
-                <!-- Пагинация, которая работает с фильтрами -->
                 <nav aria-label="Page navigation" class="mt-5">
                     <ul class="pagination justify-content-center">
                         {% if page_obj.has_previous %}

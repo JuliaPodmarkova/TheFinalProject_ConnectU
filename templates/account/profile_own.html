@@ -6,7 +6,6 @@
 {% block content %}
 <div class="container mt-4 mb-5">
 
-    <!-- Блок для сообщений Django (например, "Профиль успешно обновлен") -->
     {% if messages %}
         {% for message in messages %}
             <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
@@ -16,10 +15,8 @@
         {% endfor %}
     {% endif %}
 
-    <!-- Главный блок профиля -->
     <div class="profile-header mb-4">
         <div class="row align-items-center">
-            <!-- Аватар -->
             <div class="col-md-3 text-center text-md-start mb-3 mb-md-0">
                 {% if profile.avatar %}
                     <img src="{{ profile.avatar.url }}" alt="Фото {{ profile.full_name }}" class="profile-avatar">
@@ -28,7 +25,6 @@
                 {% endif %}
             </div>
 
-            <!-- Имя, возраст, город -->
             <div class="col-md-5">
                 <h2 class="fw-bold mb-1">{{ profile.full_name }}{% if profile.age %}, {{ profile.age }}{% endif %}</h2>
                 <p class="text-muted mb-1">
@@ -38,6 +34,15 @@
                     <i class="fa-solid fa-location-dot me-1"></i>
                     {{ profile.city|default:"Город не указан" }}
                 </p>
+
+                <!-- 👇 ВОТ ЭТОТ БЛОК МЫ ДОБАВИЛИ 👇 -->
+                {% if profile.status %}
+                <p class="lead fst-italic text-muted mt-2 mb-0">
+                    <i class="fa-solid fa-comment-dots me-1"></i> "{{ profile.status }}"
+                </p>
+                {% endif %}
+                <!-- 👆 КОНЕЦ НОВОГО БЛОКА 👆 -->
+
             </div>
 
             <div class="col-md-4 text-center text-md-end">
@@ -51,7 +56,6 @@
         </div>
     </div>
     <div class="row g-4">
-        <!-- Карточка "О себе" -->
         {% if profile.bio %}
             <div class="col-lg-6">
                 <div class="card h-100 border-0 shadow-sm">
@@ -64,7 +68,6 @@
                 </div>
             </div>
         {% endif %}
-        <!-- Карточка "Интересы" -->
         {% if profile.interests.all %}
             <div class="col-lg-6">
                 <div class="card h-100 border-0 shadow-sm">

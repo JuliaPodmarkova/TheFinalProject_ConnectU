@@ -1,0 +1,49 @@
+{% load static %}
+
+{% if candidate %}
+<div class="card shadow-lg" style="width: 22rem; border-radius: 15px; overflow: hidden; border: none;">
+    <div style="position: relative;">
+        <img src="{{ candidate.profile.get_avatar_url }}" class="card-img-top" alt="{{ candidate.profile.full_name }}" style="height: 300px; object-fit: cover;">
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); padding: 1.5rem 1rem 1rem;">
+            <h4 class="card-title text-white mb-0">{{ candidate.profile.full_name }}, {{ candidate.age }}</h4>
+            <p class="card-text text-white-50"><i class="fas fa-map-marker-alt me-1"></i>{{ candidate.profile.city }}</p>
+        </div>
+    </div>
+
+    <div class="card-body text-center">
+        <div class="d-flex justify-content-around align-items-center">
+            <button
+                class="btn btn-outline-secondary btn-lg rounded-circle"
+                style="width: 70px; height: 70px;"
+                hx-post="{% url 'process_swipe' %}"
+                hx-target="#swipe-card-container"
+                hx-swap="innerHTML"
+                hx-vals='{"swiped_user_id": "{{ candidate.id }}", "action": "dislike"}'
+            >
+                <i class="fas fa-times fa-2x"></i>
+            </button>
+
+            <button
+                class="btn btn-danger btn-lg rounded-circle"
+                style="width: 90px; height: 90px;"
+                hx-post="{% url 'process_swipe' %}"
+                hx-target="#swipe-card-container"
+                hx-swap="innerHTML"
+                hx-vals='{"swiped_user_id": "{{ candidate.id }}", "action": "like"}'
+            >
+                <i class="fas fa-heart fa-2x"></i>
+            </button>
+
+            <button class="btn btn-outline-info btn-lg rounded-circle" style="width: 70px; height: 70px;" disabled>
+                <i class="fas fa-star fa-2x"></i>
+            </button>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="text-center p-5">
+    <img src="{% static 'images/not-found.svg' %}" alt="Not Found" width="150">
+    <h3 class="mt-4">Ой, всё!</h3>
+    <p class="text-muted">На сегодня кандидаты закончились. Попробуйте зайти позже.</p>
+</div>
+{% endif %}

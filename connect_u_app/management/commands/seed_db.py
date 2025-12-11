@@ -1,15 +1,9 @@
-# /app/connect_u_app/management/commands/seed_db.py
-
 import random
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from django.contrib.auth.hashers import make_password
 from faker import Faker
-from tqdm import tqdm  # Импортируем для красивого progress bar
-
-# Убедись, что все нужные модели импортированы
-from ...models import User, UserProfile, Photo, Interaction, Match, Interest
-
+from tqdm import tqdm
+from connect_u_app.models import User, UserProfile, Photo, Like, Dislike, Match, Interest
 
 class Command(BaseCommand):
     help = 'Seeds the database with mock data for the ConnectU application'
@@ -17,21 +11,21 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('count', type=int, help='The number of users to create', default=100)
 
-    @transaction.atomic  # Оборачиваем всё в одну транзакцию для скорости и безопасности
+    @transaction.atomic
     def handle(self, *args, **options):
         count = options['count']
         fake = Faker('ru_RU')
 
-        self.stdout.write(self.style.WARNING('Clearing old data...'))
-        # Очищаем модели в правильном порядке, чтобы не нарушать связи
+        self.stdout.write(self.style.WARNING('--- Clearing old data... ---'))
         Match.objects.all().delete()
-        Interaction.objects.all().delete()
+        Like.objects.all().delete()
+        Dislike.objects.all().delete()
         Photo.objects.all().delete()
         UserProfile.objects.all().delete()
         User.objects.filter(is_superuser=False).delete()
         Interest.objects.all().delete()
 
-        self.stdout.write(self.style.SUCCESS('Creating interests...'))
+        self.stdout.write(self.style.SUCCESS('--- Creating interests... ---'))
         interests_list = [
             'Путешествия', 'Кино', 'Музыка', 'Спорт', 'Чтение', 'Кулинария',
             'Фотография', 'Игры', 'Программирование', 'Искусство', 'Танцы',
@@ -39,35 +33,24 @@ class Command(BaseCommand):
         ]
         interests = [Interest.objects.create(name=name) for name in interests_list]
 
-        self.stdout.write(self.style.SUCCESS(f'Creating {count} users...'))
-
-        # --- ВОТ КЛЮЧЕВЫЕ ИЗМЕНЕНИЯ ---
+        self.stdout.write(self.style.SUCCESS(f'--- Creating {count} users... ---'))
         users_to_create = []
-        for i in tqdm(range(count)):
-            # Генерируем базовое имя и email
-            first_name = fake.first_name()
-            last_name = fake.last_name()
-            base_username = f"{fake.user_name()}_{i}"  # Добавляем уникальный суффикс
-            base_email = f"{base_username}@example.com"  # Гарантируем уникальность email
-
+        for _ in tqdm(range(count)):
             user = User(
-                username=base_username,
-                email=base_email,
-                first_name=first_name,
-                last_name=last_name,
-                password=make_password('password123'),  # Устанавливаем пароль сразу
+                email=fake.unique.email(),
+                first_name=fake.first_name(),
+                last_name=fake.last_name(),
+                password='password123',
                 gender=random.choice(['M', 'F']),
                 birth_date=fake.date_of_birth(minimum_age=18, maximum_age=65)
             )
+            user.set_password(user.password)
             users_to_create.append(user)
-
-        # Создаем пользователей одним большим запросом (гораздо быстрее!)
         User.objects.bulk_create(users_to_create)
 
-        # Получаем всех созданных пользователей для дальнейшей работы
         users = list(User.objects.filter(is_superuser=False).order_by('-date_joined')[:count])
 
-        self.stdout.write(self.style.SUCCESS('Creating user profiles...'))
+        self.stdout.write(self.style.SUCCESS('--- Creating user profiles... ---'))
         profiles_to_create = []
         for user in tqdm(users):
             profile = UserProfile(
@@ -75,44 +58,51 @@ class Command(BaseCommand):
                 full_name=f"{user.first_name} {user.last_name}",
                 city=fake.city(),
                 status=random.choice(['searching', 'in_relationship', 'not_specified']),
-                # hobbies можно пропустить, если используем ManyToMany для Interest
             )
             profiles_to_create.append(profile)
+        UserProfile.objects.bulk_create(profiles_to_create)
 
-        # Создаем профили одним запросом
-        profiles = UserProfile.objects.bulk_create(profiles_to_create)
-
-        self.stdout.write(self.style.SUCCESS('Assigning interests to profiles...'))
-        # bulk_create не возвращает ID, поэтому получаем профили заново
+        self.stdout.write(self.style.SUCCESS('--- Assigning interests to profiles... ---'))
         profiles = UserProfile.objects.filter(user__in=users)
         ThroughModel = UserProfile.interests.through
         relations_to_create = []
         for profile in tqdm(profiles):
-            # Назначаем от 1 до 5 случайных интересов
             profile_interests = random.sample(interests, k=random.randint(1, 5))
             for interest in profile_interests:
                 relations_to_create.append(
                     ThroughModel(userprofile_id=profile.id, interest_id=interest.id)
                 )
-
-        # Создаем связи ManyToMany одним запросом
         ThroughModel.objects.bulk_create(relations_to_create, ignore_conflicts=True)
 
-        self.stdout.write(self.style.SUCCESS('Generating interactions (likes/dislikes)...'))
-        interactions_to_create = []
+        self.stdout.write(self.style.SUCCESS('--- Generating likes and dislikes... ---'))
+        likes_to_create = []
+        dislikes_to_create = []
+        all_likes_set = set()
+
         for user in tqdm(users):
-            # Каждый пользователь оценивает от 10 до 50 других пользователей
             num_reactions = random.randint(10, 50)
-            potential_targets = random.sample([u for u in users if u != user], k=num_reactions)
+            potential_targets = random.sample([u for u in users if u != user], k=min(num_reactions, len(users) - 1))
             for target_user in potential_targets:
-                interaction = Interaction(
-                    from_user=user,
-                    to_user=target_user,
-                    reaction=random.choice(['like', 'like', 'dislike'])  # Делаем лайки более частыми
-                )
-                interactions_to_create.append(interaction)
+                if random.random() < 0.7:  # 70% chance of liking
+                    likes_to_create.append(Like(from_user=user, to_user=target_user))
+                    all_likes_set.add((user.id, target_user.id))
+                else:
+                    dislikes_to_create.append(Dislike(from_user=user, to_user=target_user))
 
-        Interaction.objects.bulk_create(interactions_to_create,
-                                        ignore_conflicts=True)  # Игнорируем, если реакция уже есть
+        Like.objects.bulk_create(likes_to_create, ignore_conflicts=True)
+        Dislike.objects.bulk_create(dislikes_to_create, ignore_conflicts=True)
 
-        self.stdout.write(self.style.SUCCESS(f'Database has been seeded successfully with {count} users!'))
+        self.stdout.write(self.style.SUCCESS('--- Creating matches from mutual likes... ---'))
+        matches_to_create = []
+        processed_pairs = set()
+        for from_user_id, to_user_id in tqdm(all_likes_set):
+            if (to_user_id, from_user_id) in all_likes_set:
+                # To avoid creating duplicate matches (A,B) and (B,A)
+                pair = tuple(sorted((from_user_id, to_user_id)))
+                if pair not in processed_pairs:
+                    user1_id, user2_id = pair
+                    matches_to_create.append(Match(user1_id=user1_id, user2_id=user2_id))
+                    processed_pairs.add(pair)
+        Match.objects.bulk_create(matches_to_create, ignore_conflicts=True)
+
+        self.stdout.write(self.style.SUCCESS(f'--- Database has been seeded with {count} users and {len(matches_to_create)} matches! ---'))

@@ -4,9 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.db.models import F, Q
 from django.http import HttpResponse
-
 from ..models import User, Like, Dislike, Match, Photo
-
 
 @login_required
 def like_user_view(request, user_id):

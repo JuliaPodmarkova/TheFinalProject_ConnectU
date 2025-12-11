@@ -10,7 +10,6 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4 p-md-5">
 
-                    <!-- Аватар и основная информация -->
                     <div class="text-center mb-4">
                         <img src="{{ profile.get_avatar_url }}" alt="{{ profile.full_name }}" class="rounded-circle mb-3" width="150" height="150" style="object-fit: cover;">
                         <h2 class="card-title">{{ profile.full_name }}{% if profile.show_age %}, {{ profile.user.age }}{% endif %}</h2>
@@ -24,7 +23,6 @@
                         </p>
                     </div>
 
-                    <!-- Кнопки действий -->
                     <div class="d-flex justify-content-center mb-4">
                         {% if not is_match %}
                         <form action="{% url 'dislike_user' profile.user.id %}" method="post" class="me-2">
@@ -44,7 +42,6 @@
 
                     <hr>
 
-                    <!-- О себе -->
                     {% if profile.bio %}
                     <div class="mb-4">
                         <h5 class="fw-bold">О себе</h5>

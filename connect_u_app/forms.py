@@ -1,114 +1,124 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import get_user_model
-from .models import UserProfile, Interest, Photo
-
-User = get_user_model()
-
-# ... (остальные твои формы UserRegistrationForm, UserEditForm остаются без изменений) ...
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from .models import User, UserProfile, Interest, Photo
 
 class UserRegistrationForm(UserCreationForm):
-    gender = forms.ChoiceField(choices=User.GENDER_CHOICES, required=True, label="Пол")
-    birth_date = forms.DateField(required=True, widget=forms.DateInput(attrs={'type': 'date'}), label="Дата рождения")
-
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = UserCreationForm.Meta.fields + ('email', 'gender', 'birth_date')
+        fields = ('email', 'first_name', 'last_name')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-control'
+            field.help_text = ''
 
 class UserEditForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ('email', 'gender', 'birth_date')
+        fields = ('first_name', 'last_name', 'email', 'gender', 'birth_date')
+        widgets = {
+            'birth_date': forms.DateInput(attrs={'type': 'date'}),
+            'gender': forms.Select(),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['birth_date'].widget = forms.DateInput(attrs={'type': 'date'})
-        for field in self.fields:
-            if isinstance(self.fields[field].widget, forms.Select):
-                self.fields[field].widget.attrs.update({'class': 'form-select'})
-            else:
-                self.fields[field].widget.attrs.update({'class': 'form-control'})
+        for field in self.fields.values():
+            if 'class' not in field.widget.attrs:
+                field.widget.attrs.update({'class': 'form-control'})
 
 class UserProfileEditForm(forms.ModelForm):
-    interests = forms.ModelMultipleChoiceField(
-        queryset=Interest.objects.all(),
-        widget=forms.CheckboxSelectMultiple, # Используем стандартный виджет
-        required=False,
-        label="Ваши интересы"
-    )
     other_interests = forms.CharField(
-        required=False,
         label="Другие интересы (через запятую)",
-        widget=forms.TextInput(attrs={'placeholder': 'Йога, Путешествия, Программирование'})
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Музыка, путешествия, спорт'})
     )
-
     class Meta:
         model = UserProfile
         fields = (
-            'full_name', 'city', 'bio', 'status',
-            'interests', 'other_interests',
+            'full_name', 'city', 'bio', 'interests', 'status',
+            'search_gender', 'search_min_age', 'search_max_age',
             'show_age', 'show_city', 'searchable'
         )
         widgets = {
             'bio': forms.Textarea(attrs={'rows': 3}),
+            'interests': forms.CheckboxSelectMultiple,
+            'search_gender': forms.Select(attrs={'class': 'form-select'}),
+            'search_min_age': forms.NumberInput(attrs={'class': 'form-control'}),
+            'search_max_age': forms.NumberInput(attrs={'class': 'form-control'}),
+            'show_age': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'show_city': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'searchable': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
-        labels = {
-            'show_age': 'Показывать мой возраст другим пользователям',
-            'show_city': 'Показывать мой город в профиле',
-            'searchable': 'Разрешить другим пользователям находить меня через поиск'
-        }
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        # =============== ИЗМЕНЕНИЕ ЗДЕСЬ ===============
-        # Правильный способ добавить класс к чекбоксам
-        self.fields['interests'].widget.attrs.update({'class': 'form-check-input'})
-        # ===============================================
-
-        # Применяем классы ко всем остальным полям
+        self.fields['interests'].queryset = Interest.objects.all()
         for field_name, field in self.fields.items():
-            if field_name == 'interests': # Пропускаем уже настроенное поле
-                continue
-            if isinstance(field.widget, forms.CheckboxInput):
-                field.widget.attrs.update({'class': 'form-check-input', 'role': 'switch'})
-            elif isinstance(field.widget, forms.Select):
-                field.widget.attrs.update({'class': 'form-select'})
-            elif not isinstance(field.widget, forms.ClearableFileInput):
+            if field_name not in self.Meta.widgets:
                 field.widget.attrs.update({'class': 'form-control'})
 
-# ... (остальные твои формы PhotoForm, UserFilterForm остаются без изменений) ...
+class ProfilePreferencesForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = [
+            'search_gender',
+            'search_min_age',
+            'search_max_age',
+            'show_age',
+            'show_city',
+            'searchable'
+        ]
+        widgets = {
+            'search_gender': forms.Select(attrs={'class': 'form-select'}),
+            'search_min_age': forms.NumberInput(attrs={'class': 'form-control'}),
+            'search_max_age': forms.NumberInput(attrs={'class': 'form-control'}),
+            'show_age': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'show_city': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'searchable': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
 class PhotoForm(forms.ModelForm):
     class Meta:
         model = Photo
-        fields = ['image']
-        widgets = {
-            'image': forms.ClearableFileInput(attrs={'class': 'form-control'})
-        }
+        fields = ['image', 'is_main']
         labels = {
-            'image': 'Выберите фото для загрузки'
+            'image': 'Выберите файл',
+            'is_main': 'Сделать главным фото'
+        }
+        widgets = {
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'is_main': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
 class UserFilterForm(forms.Form):
-    GENDER_CHOICES = (
-        ('', 'Не важно'),
-        ('M', 'Мужчин'),
-        ('F', 'Женщин'),
+    gender = forms.ChoiceField(
+        choices=(('', 'Любой'),) + User.GENDER_CHOICES,
+        required=False,
+        label="Пол",
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
-    gender = forms.ChoiceField(choices=GENDER_CHOICES, required=False, label="Показывать")
-    min_age = forms.IntegerField(required=False, min_value=18, label="Возраст от", widget=forms.NumberInput(attrs={'placeholder': '18'}))
-    max_age = forms.IntegerField(required=False, min_value=18, label="до", widget=forms.NumberInput(attrs={'placeholder': '99'}))
-    city = forms.CharField(required=False, label="Город", widget=forms.TextInput(attrs={'placeholder': 'Например, Москва'}))
+    min_age = forms.IntegerField(
+        required=False,
+        label="Возраст от",
+        min_value=18,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '18'})
+    )
+    max_age = forms.IntegerField(
+        required=False,
+        label="до",
+        min_value=18,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '99'})
+    )
+    city = forms.CharField(
+        required=False,
+        label="Город",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Название города'})
+    )
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        self.fields['gender'].widget.attrs.update({'class': 'form-select'})
-        self.fields['min_age'].widget.attrs.update({'class': 'form-control'})
-        self.fields['max_age'].widget.attrs.update({'class': 'form-control'})
-        self.fields['city'].widget.attrs.update({'class': 'form-control'})
-    def clean(self):
-        cleaned_data = super().clean()
-        min_age = cleaned_data.get('min_age')
-        max_age = cleaned_data.get('max_age')
-        if min_age and max_age and min_age > max_age:
-            raise forms.ValidationError("Минимальный возраст не может быть больше максимального.")
-        return cleaned_data
+        if user and user.is_authenticated and hasattr(user, 'profile'):
+            self.fields['gender'].initial = user.profile.search_gender
+            self.fields['min_age'].initial = user.profile.search_min_age
+            self.fields['max_age'].initial = user.profile.search_max_age

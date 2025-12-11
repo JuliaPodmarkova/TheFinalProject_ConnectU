@@ -5,7 +5,6 @@
 
 {% block content %}
 <style>
-    /* Я оставил стили здесь для удобства, но лучше перенести их в main.css */
     .chat-container {
         display: flex;
         flex-direction: column;
@@ -102,14 +101,11 @@
 
     const chatMessages = document.getElementById('chat-messages');
 
-    // Функция для прокрутки вниз
     function scrollToBottom() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
-    // Прокрутка при загрузке страницы
     scrollToBottom();
 
-    // Слушаем сообщения от сервера
     chatSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
 
@@ -120,12 +116,12 @@
 
         const bubbleDiv = document.createElement('div');
         bubbleDiv.className = 'message-bubble';
-        bubbleDiv.innerHTML = data.message.replace(/\n/g, '<br>'); // Заменяем переносы строк на <br>
+        bubbleDiv.innerHTML = data.message.replace(/\n/g, '<br>');
 
         messageDiv.appendChild(bubbleDiv);
         chatMessages.appendChild(messageDiv);
 
-        scrollToBottom(); // Прокрутка после получения нового сообщения
+        scrollToBottom();
     };
 
     chatSocket.onclose = function(e) {
@@ -135,14 +131,12 @@
     const messageInput = document.getElementById('chat-message-input');
     messageInput.focus();
 
-    // Отправляем сообщение по нажатию Enter
     messageInput.onkeyup = function(e) {
         if (e.key === 'Enter') {  // enter, return
             document.getElementById('chat-form').requestSubmit();
         }
     };
 
-    // Отправляем сообщение при сабмите формы
     document.getElementById('chat-form').onsubmit = function(e) {
         e.preventDefault();
         const message = messageInput.value;

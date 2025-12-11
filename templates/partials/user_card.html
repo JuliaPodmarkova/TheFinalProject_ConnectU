@@ -1,4 +1,3 @@
-<!-- templates/partials/user_card.html -->
 {% load static %}
 {% if recommended_user %}
 <div class="card shadow-sm mb-4 border-0">
@@ -24,11 +23,9 @@
         {% endif %}
     </div>
 
-    <!-- Обновленный блок с кнопками -->
     <div class="card-footer bg-transparent border-0 pb-4 pt-0">
         <div class="d-flex justify-content-around align-items-center">
 
-            <!-- Дизлайк -->
             <button
                 class="btn btn-light action-btn rounded-circle"
                 hx-post="{% url 'dislike_user' recommended_user.id %}"
@@ -39,12 +36,10 @@
                 <i class="fa-solid fa-xmark"></i>
             </button>
 
-            <!-- Сообщение (пока без действия) -->
             <button class="btn btn-primary action-btn rounded-circle" title="Написать сообщение">
                 <i class="fa-solid fa-comment-dots"></i>
             </button>
 
-            <!-- Лайк -->
             <button
                 class="btn btn-danger action-btn rounded-circle"
                 hx-post="{% url 'like_user' recommended_user.id %}"
@@ -59,7 +54,6 @@
     </div>
 </div>
 {% else %}
-<!-- Этот блок остался без изменений, он и так хорош -->
 <div class="text-center p-5 mt-5">
     <i class="fa-regular fa-face-sad-tear fa-4x text-muted mb-4"></i>
     <h4 class="text-muted">Новых анкет пока нет</h4>

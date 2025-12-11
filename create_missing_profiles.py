@@ -1,8 +1,6 @@
-# create_missing_profiles.py
 import os
 import django
 
-# Настраиваем окружение Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'connect_u.settings')
 django.setup()
 
@@ -10,9 +8,7 @@ from connect_u_app.models import User, UserProfile
 
 
 def run():
-    """
-    Находит всех пользователей без профиля и создает для них пустой профиль.
-    """
+
     users_without_profile = User.objects.filter(profile__isnull=True)
     count = 0
 
@@ -20,10 +16,9 @@ def run():
 
     for user in users_without_profile:
         try:
-            # Пытаемся создать профиль с какими-то значениями по умолчанию
             UserProfile.objects.create(
                 user=user,
-                full_name=user.email.split('@')[0],  # Используем часть email как временное имя
+                full_name=user.email.split('@')[0],
                 city="Город не указан"
             )
             print(f"✅ Создан профиль для пользователя: {user.email}")

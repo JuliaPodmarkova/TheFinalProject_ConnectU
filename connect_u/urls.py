@@ -6,15 +6,17 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, Sp
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('connect_u_app.urls')),
-    path('api/v1/', include('connect_u_app.api_urls')),
-    path('accounts/', include('allauth.urls')),
+
     path('api/v1/schema/', SpectacularAPIView.as_view(), name='schema'),
-    # Swagger UI:
     path('api/v1/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    # ReDoc UI:
     path('api/v1/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('api/v1/', include('connect_u_app.api_urls')),
+
+    path('accounts/', include('allauth.urls')),
+
+    path('', include('connect_u_app.urls')),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

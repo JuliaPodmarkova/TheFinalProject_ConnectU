@@ -5,31 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1587ceec-4b57-4d39-ad89-7d56d9c39185" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/templates/account/activity_history.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/socialaccount/close_popup.html.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/connect_u/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u_app/consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/consumers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/forms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u_app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/signals.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/signals.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/connect_u_app/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u_app/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u_app/views/actions.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/views/actions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/views/auth_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/views/auth_views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/views/interactions.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/views/interactions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u_app/views/pages.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/views/pages.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/views/swipe_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/views/swipe_views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/account/profile_own.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account/profile_own.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/account/profile_public.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account/profile_public.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/styles.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/chat.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/home.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/partials/_header.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/partials/_header.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/partials/user_card.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/partials/user_card.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/profile.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/search.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/search.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/swipe/card.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/swipe/card.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/swipe/main.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/swipe/main.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -176,15 +164,6 @@
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/connect_u_app/serializers.py</url>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/connect_u_app/models.py</url>
-          <line>274</line>
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/connect_u_app/views/__init__.py</url>
           <option name="timeStamp" value="6" />

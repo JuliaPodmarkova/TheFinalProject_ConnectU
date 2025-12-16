@@ -22,6 +22,7 @@ urlpatterns = [
     path('accounts/login/', auth_views.login_view, name='account_login'),
     path('accounts/logout/', auth_views.logout_view, name='account_logout'),
     path('accounts/signup/', auth_views.register_view, name='account_signup'),
+    path('close-popup/', pages.close_popup_view, name='close_popup'),
 
     # --- API для свайпов ---
     path('api/get_next_profile/', swipe_views.get_next_profile, name='get_next_profile'),

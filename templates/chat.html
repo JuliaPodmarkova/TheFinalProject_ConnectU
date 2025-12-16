@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}Чат с {{ other_user.profile.full_name }}{% endblock %}
+
 {% block content %}
 <style>
     .chat-container {
         display: flex;
         flex-direction: column;
-        height: calc(100vh - 150px); /* Адаптивная высота под экран */
+        height: calc(100vh - 150px); /* Адаптивная высота под хедер */
         max-width: 800px;
         margin: auto;
         border: 1px solid #e9ecef;
@@ -46,10 +47,22 @@
         border-radius: 1.25rem;
         word-wrap: break-word;
     }
-    .message.sent { align-self: flex-end; }
-    .message.sent .message-bubble { background-color: #0d6efd; color: white; border-bottom-right-radius: 0.25rem; }
-    .message.received { align-self: flex-start; }
-    .message.received .message-bubble { background-color: #e9ecef; color: #212529; border-bottom-left-radius: 0.25rem; }
+    .message.sent {
+        align-self: flex-end;
+    }
+    .message.sent .message-bubble {
+        background-color: #0d6efd;
+        color: white;
+        border-bottom-right-radius: 0.25rem;
+    }
+    .message.received {
+        align-self: flex-start;
+    }
+    .message.received .message-bubble {
+        background-color: #e9ecef;
+        color: #212529;
+        border-bottom-left-radius: 0.25rem;
+    }
     .chat-form {
         padding: 1rem;
         border-top: 1px solid #e9ecef;
@@ -57,12 +70,25 @@
     .invitation-banner {
         padding: 1rem;
         border-bottom: 1px solid #e9ecef;
-        background-color: #fffbe6;
+        background-color: #fffbe6; /* Светло-желтый фон для привлечения внимания */
+    }
+    /* Стиль для системных сообщений */
+    .system-message-container {
+        align-self: center;
+        max-width: 100%;
+    }
+    .system-message {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        font-size: 0.85rem;
+        text-align: center;
+        border-radius: 8px !important; /* Переопределяем стандартный радиус */
     }
 </style>
+
 <div class="chat-container">
     {% if messages %}
-        <div class="p-3">
+        <div class="m-3">
         {% for message in messages %}
             <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
                 {{ message }}
@@ -71,119 +97,115 @@
         {% endfor %}
         </div>
     {% endif %}
+
     <div class="chat-header">
-        <img src="{{ other_user.profile.get_avatar_url }}" alt="{{ other_user.profile.full_name }}">
-        <h5 class="mb-0">{{ other_user.profile.full_name }}</h5>
+        <a href="{% url 'profile_view' other_user.id %}">
+            <img src="{{ other_user.profile.get_avatar_url }}" alt="Фото {{ other_user.profile.full_name }}">
+        </a>
+        <div>
+            <h5 class="mb-0">{{ other_user.profile.full_name }}</h5>
+            <small class="text-muted">Онлайн</small> <!-- Статус можно сделать динамическим -->
+        </div>
     </div>
+
     {% if active_invitation %}
         <div class="invitation-banner text-center">
             {% if active_invitation.from_user == request.user %}
-                <p class="mb-0">Вы отправили приглашение. Ожидаем ответа от {{ other_user.profile.full_name }}.</p>
+                <p class="mb-2">Вы отправили приглашение. Ожидайте ответа.</p>
+                <p class="text-muted small mb-0">"{{ active_invitation.message }}"</p>
             {% else %}
-                <p><strong>{{ other_user.profile.full_name }}</strong> отправил(а) вам приглашение!</p>
-                {% if active_invitation.message %}<p class="fst-italic">"{{ active_invitation.message }}"</p>{% endif %}
-                <form action="{% url 'handle_invitation' active_invitation.id %}" method="post" class="d-inline">
+                <p class="mb-2"><strong>{{ active_invitation.from_user.profile.full_name }}</strong> отправил(а) вам приглашение!</p>
+                {% if active_invitation.message %}<p class="text-muted small">"{{ active_invitation.message }}"</p>{% endif %}
+                <form method="post" action="{% url 'handle_invitation' active_invitation.id %}" class="d-inline">
                     {% csrf_token %}
                     <button type="submit" name="action" value="accept" class="btn btn-success btn-sm">Принять</button>
                 </form>
-                <form action="{% url 'handle_invitation' active_invitation.id %}" method="post" class="d-inline">
+                <form method="post" action="{% url 'handle_invitation' active_invitation.id %}" class="d-inline">
                     {% csrf_token %}
                     <button type="submit" name="action" value="decline" class="btn btn-danger btn-sm">Отклонить</button>
                 </form>
             {% endif %}
         </div>
-    {% elif accepted_invitation %}
-        <div class="invitation-banner text-center bg-light-success">
-            <p class="mb-1">🎉 Приглашение принято! Контактная информация от <strong>{{ accepted_invitation.from_user.profile.full_name }}</strong>:</p>
-            <p class="fw-bold mb-0">{{ accepted_invitation.contact_info }}</p>
-        </div>
     {% endif %}
+
     <div class="chat-messages" id="chat-messages">
         {% for message in messages %}
-            <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %}">
-                <div class="message-bubble">
+            <div class="message {% if message.is_system %}system-message-container{% elif message.sender == request.user %}sent{% else %}received{% endif %}">
+                <div class="message-bubble {% if message.is_system %}system-message{% endif %}">
                     {{ message.content|linebreaksbr }}
                 </div>
             </div>
         {% endfor %}
     </div>
+
     <div class="chat-form">
-        <form id="chat-form" class="d-flex">
-            <input type="text" id="chat-message-input" class="form-control me-2" placeholder="Напишите сообщение..." autocomplete="off">
-            <button type="submit" class="btn btn-primary">Отправить</button>
-        </form>
-        {% if not active_invitation and not accepted_invitation %}
-        <div class="mt-3">
-            <button class="btn btn-outline-success btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#invitation-form" aria-expanded="false" aria-controls="invitation-form">
-                🤝 Пригласить на встречу / Обменяться контактами
+        <form id="chat-form" class="d-flex gap-2">
+            <input type="text" id="chat-message-input" class="form-control" placeholder="Напишите сообщение..." autocomplete="off">
+            <button type="submit" id="chat-message-submit" class="btn btn-primary">
+                <i class="fa-solid fa-paper-plane"></i>
             </button>
-            <div class="collapse mt-2" id="invitation-form">
-                <div class="card card-body">
-                    <form action="{% url 'send_invitation' match.id %}" method="post">
-                        {% csrf_token %}
-                        <div class="mb-2">
-                            <label for="id_message" class="form-label">Сообщение (необязательно)</label>
-                            <input type="text" name="message" class="form-control" id="id_message" placeholder="Например: Привет! Может, сходим в кино?">
-                        </div>
-                        <div class="mb-2">
-                            <label for="id_contact_info" class="form-label">Ваши контакты (телефон, соцсеть)</label>
-                            <input type="text" name="contact_info" class="form-control" id="id_contact_info" required placeholder="Будут показаны только после принятия приглашения">
-                        </div>
-                        <button type="submit" class="btn btn-success">Отправить приглашение</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        {% endif %}
+        </form>
     </div>
 </div>
+
 {{ match.id|json_script:"match-id" }}
 {{ request.user.id|json_script:"user-id" }}
+
 <script>
     const matchId = JSON.parse(document.getElementById('match-id').textContent);
     const currentUserId = JSON.parse(document.getElementById('user-id').textContent);
     const chatSocket = new WebSocket(
-        'ws://'
-        + window.location.host
-        + '/ws/chat/'
-        + matchId
-        + '/'
+        'ws://' + window.location.host + '/ws/chat/' + matchId + '/'
     );
+
     const chatMessages = document.getElementById('chat-messages');
+
     function scrollToBottom() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
+
     scrollToBottom();
+
     chatSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
-        const messageType = data.sender_id === currentUserId ? 'sent' : 'received';
+        const isSystem = data.is_system;
+
+        let messageType;
+        if (isSystem) {
+            messageType = 'system-message-container';
+        } else {
+            messageType = data.sender_id === currentUserId ? 'sent' : 'received';
+        }
+
         const messageDiv = document.createElement('div');
         messageDiv.className = 'message ' + messageType;
+
         const bubbleDiv = document.createElement('div');
         bubbleDiv.className = 'message-bubble';
+        if (isSystem) {
+            bubbleDiv.classList.add('system-message');
+        }
         bubbleDiv.innerHTML = data.message.replace(/\n/g, '<br>');
+
         messageDiv.appendChild(bubbleDiv);
         chatMessages.appendChild(messageDiv);
-        scrollToBottom();
+        scrollToBottom(); // Прокрутка вниз после получения нового сообщения
     };
+
     chatSocket.onclose = function(e) {
         console.error('Chat socket closed unexpectedly');
     };
-    const messageInput = document.getElementById('chat-message-input');
-    messageInput.focus();
-    messageInput.onkeyup = function(e) {
-        if (e.key === 'Enter') {
-            document.getElementById('chat-form').requestSubmit();
-        }
-    };
+
     document.getElementById('chat-form').onsubmit = function(e) {
         e.preventDefault();
-        const message = messageInput.value;
-        if (message.trim() === '') return;
-        chatSocket.send(JSON.stringify({
-            'message': message
-        }));
-        messageInput.value = '';
+        const messageInputDom = document.getElementById('chat-message-input');
+        const message = messageInputDom.value;
+        if (message.trim() !== '') {
+            chatSocket.send(JSON.stringify({
+                'message': message
+            }));
+            messageInputDom.value = '';
+        }
     };
 </script>
 {% endblock %}

@@ -2,9 +2,10 @@ from django.shortcuts import redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
-from django.db.models import F, Q
 from django.http import HttpResponse, HttpResponseForbidden
-from ..models import User, Like, Dislike, Match, Photo, Invitation
+from ..models import User, Like, Dislike, Match, Photo, Invitation, Message
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 
 @login_required
@@ -82,8 +83,6 @@ def send_invitation(request, match_id):
         if request.user != match.user1 and request.user != match.user2:
             return HttpResponseForbidden()
         to_user = match.user2 if request.user == match.user1 else match.user1
-
-        # 👇 ИСПРАВЛЕНИЕ ЗДЕСЬ: Проверяем, что именно ТЕКУЩИЙ пользователь еще не отправлял приглашение
         if not Invitation.objects.filter(match=match, from_user=request.user, status='sent').exists():
             Invitation.objects.create(
                 match=match,
@@ -105,13 +104,40 @@ def handle_invitation(request, invitation_id):
         invitation = get_object_or_404(Invitation, id=invitation_id)
         if request.user != invitation.to_user:
             return HttpResponseForbidden()
+
         action = request.POST.get('action')
+        system_message_content = ""
+
         if action == 'accept':
             invitation.status = 'accepted'
             messages.success(request, 'Вы приняли приглашение!')
+            system_message_content = f"🤝 Приглашение принято! Контакты от {invitation.from_user.profile.full_name}: {invitation.contact_info}"
+
         elif action == 'decline':
             invitation.status = 'declined'
             messages.info(request, 'Вы отклонили приглашение.')
+            system_message_content = f"🚫 Приглашение от {invitation.from_user.profile.full_name} было отклонено."
+
         invitation.save()
+
+        if system_message_content:
+            message = Message.objects.create(
+                match=invitation.match,
+                sender=request.user,
+                content=system_message_content,
+                is_system=True
+            )
+
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f'chat_{invitation.match.id}',
+                {
+                    'type': 'chat_message',
+                    'message': message.content,
+                    'sender_id': message.sender.id,
+                    'is_system': message.is_system,
+                }
+            )
+
         return redirect('chat', match_id=invitation.match.id)
     return redirect('match_list')

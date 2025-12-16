@@ -147,7 +147,7 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 SITE_ID = 1
-LOGIN_REDIRECT_URL = '/profile/edit'
+LOGIN_REDIRECT_URL = '/close-popup/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_USERNAME_REQUIRED = False
@@ -156,7 +156,7 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 
-SOCIALACCOUNT_LOGIN_ON_GET=True
+SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_ADAPTER = 'connect_u_app.adapters.CustomSocialAccountAdapter'
 SOCIALACCOUNT_PROVIDERS = {
@@ -165,6 +165,18 @@ SOCIALACCOUNT_PROVIDERS = {
         'AUTH_PARAMS': {'access_type': 'online'}
     }
 }
+
+# Настройка отправки email в консоль для режима разработки
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Настройки для отправки реальных писем через SMTP (например, Gmail)
+'''EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # SMTP-сервер Gmail
+EMAIL_PORT = 587                 # Порт для TLS
+EMAIL_USE_TLS = True             # Использовать TLS-шифрование
+EMAIL_HOST_USER = 'your_email@gmail.com'  # Твой email на Gmail
+EMAIL_HOST_PASSWORD = 'your_app_password' # Пароль приложения (не пароль от аккаунта!)'''
+
 # --- Настройки для Jazzmin (Админка) ---
 JAZZMIN_SETTINGS = {
     "site_title": "ConnectU Admin",

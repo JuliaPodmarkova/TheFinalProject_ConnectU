@@ -28,7 +28,7 @@ class UserEditForm(forms.ModelForm):
             if 'class' not in field.widget.attrs:
                 field.widget.attrs.update({'class': 'form-control'})
 
-class UserProfileEditForm(forms.ModelForm):
+class ProfileEditForm(forms.ModelForm):
     other_interests = forms.CharField(
         label="Другие интересы (через запятую)",
         required=False,

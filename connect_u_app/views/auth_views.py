@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import render, redirect
 
-from ..forms import (UserRegistrationForm, UserEditForm, UserProfileEditForm,
+from ..forms import (UserRegistrationForm, UserEditForm, ProfileEditForm,
                      ProfilePreferencesForm)
 from ..models import Interest
 
@@ -56,7 +56,7 @@ def register_view(request):
 def profile_edit(request):
     if request.method == 'POST':
         user_form = UserEditForm(request.POST, instance=request.user)
-        profile_form = UserProfileEditForm(request.POST, request.FILES, instance=request.user.profile)
+        profile_form = ProfileEditForm(request.POST, request.FILES, instance=request.user.profile)
         preferences_form = ProfilePreferencesForm(request.POST, instance=request.user.profile)
 
         if user_form.is_valid() and profile_form.is_valid() and preferences_form.is_valid():
@@ -83,7 +83,7 @@ def profile_edit(request):
             messages.error(request, 'Пожалуйста, исправьте ошибки в форме.')
     else:
         user_form = UserEditForm(instance=request.user)
-        profile_form = UserProfileEditForm(instance=request.user.profile)
+        profile_form = ProfileEditForm(instance=request.user.profile)
         preferences_form = ProfilePreferencesForm(instance=request.user.profile)
 
     context = {

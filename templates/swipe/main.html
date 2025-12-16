@@ -1,17 +1,30 @@
+<!-- templates/swipe/main.html -->
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Поиск | ConnectU{% endblock %}
+{% block title %}Знакомства | ConnectU{% endblock %}
 
 {% block content %}
-<div class="container-fluid d-flex flex-column align-items-center justify-content-center" style="min-height: calc(100vh - 80px);">
-
-    {# Этот контейнер будет целью для обновлений от HTMX #}
-    <div id="swipe-card-container">
-        {% include 'swipe/card.html' with candidate=candidate %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 col-xl-5">
+            <!-- Этот блок будет контейнером для карточек -->
+            <div id="swipe-card-container"
+                 hx-get="{% url 'get_next_profile' %}"
+                 hx-trigger="load"
+                 hx-swap="innerHTML">
+                <!-- Сюда HTMX загрузит первую карточку -->
+                <div class="d-flex justify-content-center align-items-center" style="min-height: 500px;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Загрузка...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
 </div>
 
+<!-- Модальное окно для мэтча (остается здесь, на главной странице) -->
 <div class="modal fade" id="matchModal" tabindex="-1" aria-labelledby="matchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-center" style="background: linear-gradient(45deg, #ff8a80, #ff4081); border: none; color: white;">
@@ -31,17 +44,15 @@
 
 {% block extra_js %}
 <script>
-
-    document.body.addEventListener('matchOccurred', function(event) {
-
-        const matchData = event.detail;
-        console.log("Match data received:", matchData);
-
+// Этот скрипт будет слушать событие 'matchOccurred'
+document.body.addEventListener('matchOccurred', function(event) {
+    const matchData = event.detail;
+    if (matchData && matchData.matchName) {
         document.getElementById('matchName').textContent = matchData.matchName;
         document.getElementById('matchAvatar').src = matchData.matchAvatarUrl;
-
         const matchModal = new bootstrap.Modal(document.getElementById('matchModal'));
         matchModal.show();
-    });
+    }
+});
 </script>
 {% endblock %}

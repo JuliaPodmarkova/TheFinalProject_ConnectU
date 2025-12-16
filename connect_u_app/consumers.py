@@ -3,9 +3,6 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 from .models import Match, Message
-import logging
-
-logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
@@ -50,13 +47,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.channel_name
             )
             await self.accept()
-            logger.warning(
-                f"USER {self.user.id} CONNECTED to group {self.match_group_name}")  # Используем warning, чтобы было видно
         else:
             await self.close()
 
     async def disconnect(self, close_code):
-        logger.warning(f"USER {self.user.id} DISCONNECTED from group {self.match_group_name}")
         await self.channel_layer.group_discard(
             self.match_group_name,
             self.channel_name
@@ -65,9 +59,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message_content = text_data_json['message']
-
-        logger.warning(
-            f"RECEIVED message '{message_content}' from USER {self.user.id} for group {self.match_group_name}")
 
         message_data = await self.create_message_and_get_data(content=message_content)
 
@@ -81,10 +72,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'timestamp': message_data['timestamp'],
             }
         )
-        logger.warning(f"SENT message to channel layer for group {self.match_group_name}")
 
     async def chat_message(self, event):
-        logger.warning(f"CONSUMER for USER {self.user.id} GOT message from channel layer: {event}")
 
         message = event['message']
         sender_id = event['sender_id']
@@ -97,4 +86,3 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'sender_name': sender_name,
             'timestamp': timestamp
         }))
-        logger.warning(f"SENT message via websocket to USER {self.user.id}")

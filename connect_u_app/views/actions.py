@@ -3,21 +3,19 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.db.models import F, Q
-from django.http import HttpResponse
-from ..models import User, Like, Dislike, Match, Photo
+from django.http import HttpResponse, HttpResponseForbidden
+from ..models import User, Like, Dislike, Match, Photo, Invitation
+
 
 @login_required
 def like_user_view(request, user_id):
     if request.method == 'POST':
         current_user = request.user
         liked_user = get_object_or_404(User, id=user_id)
-
         Like.objects.get_or_create(from_user=current_user, to_user=liked_user)
-
         if Like.objects.filter(from_user=liked_user, to_user=current_user).exists():
             user_a, user_b = sorted([current_user, liked_user], key=lambda u: u.id)
             match, created = Match.objects.get_or_create(user1=user_a, user2=user_b)
-
             if created and request.htmx:
                 html = f"""
                 <div id="match-modal-content" hx-swap-oob="innerHTML">
@@ -35,10 +33,8 @@ def like_user_view(request, user_id):
                 response = HttpResponse(html)
                 response['HX-Trigger'] = 'showMatchModal'
                 return response
-
         if request.htmx:
             return HttpResponse(status=200)
-
     return redirect(reverse('home'))
 
 
@@ -48,11 +44,10 @@ def dislike_user_view(request, user_id):
         current_user = request.user
         disliked_user = get_object_or_404(User, id=user_id)
         Dislike.objects.get_or_create(from_user=current_user, to_user=disliked_user)
-
         if request.htmx:
             return HttpResponse(status=200)
-
     return redirect(reverse('home'))
+
 
 @login_required
 def delete_photo_view(request, photo_id):
@@ -68,6 +63,7 @@ def delete_photo_view(request, photo_id):
                 new_main.save()
     return redirect('profile_photos')
 
+
 @login_required
 def set_main_photo_view(request, photo_id):
     photo = get_object_or_404(Photo, id=photo_id, user=request.user)
@@ -77,3 +73,45 @@ def set_main_photo_view(request, photo_id):
         photo.save()
         messages.success(request, 'Главное фото обновлено.')
     return redirect('profile_photos')
+
+
+@login_required
+def send_invitation(request, match_id):
+    if request.method == 'POST':
+        match = get_object_or_404(Match, id=match_id)
+        if request.user != match.user1 and request.user != match.user2:
+            return HttpResponseForbidden()
+        to_user = match.user2 if request.user == match.user1 else match.user1
+
+        # 👇 ИСПРАВЛЕНИЕ ЗДЕСЬ: Проверяем, что именно ТЕКУЩИЙ пользователь еще не отправлял приглашение
+        if not Invitation.objects.filter(match=match, from_user=request.user, status='sent').exists():
+            Invitation.objects.create(
+                match=match,
+                from_user=request.user,
+                to_user=to_user,
+                message=request.POST.get('message', ''),
+                contact_info=request.POST.get('contact_info', '')
+            )
+            messages.success(request, 'Приглашение успешно отправлено!')
+        else:
+            messages.warning(request, 'Вы уже отправляли приглашение в этом чате. Дождитесь ответа.')
+        return redirect('chat', match_id=match_id)
+    return redirect('match_list')
+
+
+@login_required
+def handle_invitation(request, invitation_id):
+    if request.method == 'POST':
+        invitation = get_object_or_404(Invitation, id=invitation_id)
+        if request.user != invitation.to_user:
+            return HttpResponseForbidden()
+        action = request.POST.get('action')
+        if action == 'accept':
+            invitation.status = 'accepted'
+            messages.success(request, 'Вы приняли приглашение!')
+        elif action == 'decline':
+            invitation.status = 'declined'
+            messages.info(request, 'Вы отклонили приглашение.')
+        invitation.save()
+        return redirect('chat', match_id=invitation.match.id)
+    return redirect('match_list')

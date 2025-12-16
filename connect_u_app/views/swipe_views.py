@@ -1,83 +1,75 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
-from django.db.models import Q
-from ..models import User, UserProfile, Like, Dislike, Match
-from datetime import date
+from django.http import JsonResponse, HttpResponse
+from ..models import User, Like, Dislike, Match
+from django.views.decorators.http import require_POST
 import json
+from datetime import date, timedelta
 
-
-def get_next_candidate_for_user(current_user):
-    liked_user_ids = Like.objects.filter(from_user=current_user).values_list('to_user_id', flat=True)
-    disliked_user_ids = Dislike.objects.filter(from_user=current_user).values_list('to_user_id', flat=True)
-    interacted_user_ids = set(liked_user_ids) | set(disliked_user_ids)
-
-    candidates = User.objects.exclude(id=current_user.id).exclude(id__in=interacted_user_ids).filter(
-        profile__searchable=True, is_active=True)
-
-    try:
-        preferences = current_user.profile
-        if preferences:
-            if preferences.search_gender:
-                candidates = candidates.filter(gender=preferences.search_gender)
-
-            today = date.today()
-            if preferences.search_min_age:
-                max_birth_date = today.replace(year=today.year - preferences.search_min_age)
-                candidates = candidates.filter(birth_date__lte=max_birth_date)
-            if preferences.search_max_age:
-                min_birth_date = today.replace(year=today.year - (preferences.search_max_age + 1))
-                candidates = candidates.filter(birth_date__gte=min_birth_date)
-
-    except UserProfile.DoesNotExist:
-        pass
-
-    return candidates.order_by('?').first()
-
+def get_next_user_for_swipe(current_user):
+    """Возвращает следующего пользователя для свайпа."""
+    liked_ids = Like.objects.filter(from_user=current_user).values_list('to_user_id', flat=True)
+    disliked_ids = Dislike.objects.filter(from_user=current_user).values_list('to_user_id', flat=True)
+    excluded_ids = set(liked_ids) | set(disliked_ids)
+    excluded_ids.add(current_user.id)
+    profile = current_user.profile
+    users = User.objects.exclude(id__in=excluded_ids)
+    if profile.search_gender:
+        users = users.filter(gender=profile.search_gender)
+    if profile.search_min_age:
+        latest_birth_date = date.today() - timedelta(days=int(profile.search_min_age * 365.25))
+        users = users.filter(birth_date__lte=latest_birth_date)
+    if profile.search_max_age:
+        earliest_birth_date = date.today() - timedelta(days=int((profile.search_max_age + 1) * 365.25))
+        users = users.filter(birth_date__gte=earliest_birth_date)
+    return users.order_by('?').first()
 
 @login_required
-def swipe_view(request):
-
-    candidate = get_next_candidate_for_user(request.user)
-    context = {'candidate': candidate}
-    return render(request, 'swipe/main.html', context)
-
+def swipe_main_view(request):
+    """Отображает основную страницу для свайпов (контейнер)."""
+    return render(request, 'swipe/main.html')
 
 @login_required
-def process_swipe(request):
+def get_next_profile(request):
+    """HTMX-эндпоинт для получения карточки следующего пользователя."""
+    next_user = get_next_user_for_swipe(request.user)
+    if next_user:
+        return render(request, 'swipe/card.html', {'profile_user': next_user})
+    else:
+        return HttpResponse(
+            "<div class='text-center h4 m-5'>Больше никого нет... Попробуйте изменить фильтры в профиле!</div>")
 
-    if request.method == 'POST':
-        swiped_user_id = request.POST.get('swiped_user_id')
-        action = request.POST.get('action')
+@login_required
+@require_POST
+def swipe(request):
+    """Обрабатывает лайк или дизлайк и возвращает следующую карточку."""
+    # ИСПРАВЛЕНИЕ: HTMX с hx-vals отправляет данные в request.POST, а не в request.body
+    user_id = request.POST.get('user_id')
+    action = request.POST.get('action')
 
-        swiped_user = get_object_or_404(User, id=swiped_user_id)
-        current_user = request.user
+    if not user_id or not action:
+        return HttpResponse("Missing data", status=400)
 
-        is_match = False
-
-        if action == 'like':
-            Like.objects.get_or_create(from_user=current_user, to_user=swiped_user)
-            if Like.objects.filter(from_user=swiped_user, to_user=current_user).exists():
-                is_match = True
-                Match.objects.get_or_create(
-                    user1=min(current_user, swiped_user, key=lambda u: u.id),
-                    user2=max(current_user, swiped_user, key=lambda u: u.id)
-                )
-
-        elif action == 'dislike':
-            Dislike.objects.get_or_create(from_user=current_user, to_user=swiped_user)
-
-        next_candidate = get_next_candidate_for_user(current_user)
-
-        context = {'candidate': next_candidate}
-        response = render(request, 'swipe/card.html', context)
-
+    to_user = User.objects.get(id=user_id)
+    from_user = request.user
+    if action == 'like':
+        Like.objects.get_or_create(from_user=from_user, to_user=to_user)
+        is_match = Like.objects.filter(from_user=to_user, to_user=from_user).exists()
+        next_user = get_next_user_for_swipe(from_user)
+        response = render(request, 'swipe/card.html', {'profile_user': next_user})
         if is_match:
+            Match.objects.get_or_create(
+                user1=min(from_user, to_user, key=lambda u: u.id),
+                user2=max(from_user, to_user, key=lambda u: u.id)
+            )
             match_data = {
-                "matchName": swiped_user.profile.full_name,
-                "matchAvatarUrl": swiped_user.profile.get_avatar_url()
+                "matchName": to_user.profile.full_name,
+                "matchAvatarUrl": to_user.profile.get_avatar_url()
             }
             response['HX-Trigger'] = json.dumps({'matchOccurred': match_data})
-
         return response
-    return redirect('swipe')
+    elif action == 'dislike':
+        Dislike.objects.get_or_create(from_user=from_user, to_user=to_user)
+        next_user = get_next_user_for_swipe(from_user)
+        return render(request, 'swipe/card.html', {'profile_user': next_user})
+    return HttpResponse(status=400)

@@ -8,10 +8,10 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Лента</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'feed' %}active{% endif %}" href="{% url 'feed' %}">Лента</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'swipe' %}active{% endif %}" href="{% url 'swipe' %}">Знакомства</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Знакомства</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'match_list' %}active{% endif %}" href="{% url 'match_list' %}">Мои мэтчи</a>

@@ -5,62 +5,31 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1587ceec-4b57-4d39-ad89-7d56d9c39185" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/connect_u_app/adapters.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/connect_u_app/views/swipe_views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/images/not-found.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/swipe/card.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/swipe/main.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/account/activity_history.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u/asgi.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u/asgi.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u_app/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/api_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/api_views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/apps.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u_app/consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/consumers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u_app/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/management/commands/seed_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/management/commands/seed_db.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/migrations/0002_interaction.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/migrations/0003_userprofile_searchable_userprofile_show_age_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/migrations/0004_alter_dislike_options_alter_interaction_options_and_more.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u_app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u_app/signals.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/signals.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u_app/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/views/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/views/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u_app/views/actions.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/views/actions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u_app/views/auth_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/views/auth_views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/connect_u_app/views/interactions.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/views/interactions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u_app/views/pages.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/views/pages.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/create_missing_profiles.py" beforeDir="false" afterPath="$PROJECT_DIR$/create_missing_profiles.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/manage.py" beforeDir="false" afterPath="$PROJECT_DIR$/manage.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nginx/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/nginx/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/account/google_login_callback.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/account/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/account/photo_gallery.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account/photo_gallery.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/account/profile_edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account/profile_edit.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/connect_u_app/views/swipe_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/views/swipe_views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/account/profile_own.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account/profile_own.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/account/profile_photos.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account/profile_photos.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/account/profile_public.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account/profile_public.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/account/signup.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account/signup.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/chat.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/landing.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/landing.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/partials/_header.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/partials/_header.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/partials/match_modal.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/partials/match_modal.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/partials/user_card.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/partials/user_card.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/profile.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/profile.html" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/search.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/search.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/settings.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/socialaccount/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/socialaccount/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wait-for-it.sh" beforeDir="false" afterPath="$PROJECT_DIR$/wait-for-it.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/структура_полная.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/swipe/card.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/swipe/card.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/swipe/main.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/swipe/main.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -111,7 +80,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "/run/media/juliat/InfoDisk1/TheFinalProject_ConnectU",
+    "last_opened_file_path": "/run/media/juliat/InfoDisk/TheFinalProject_ConnectU",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
 }]]></component>
@@ -128,6 +97,62 @@
       <deployment type="docker-compose.yml">
         <settings />
       </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <module name="TheFinalProject_ConnectU" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Autodetect">
+      <module name="TheFinalProject_ConnectU" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Doctests">
+      <module name="TheFinalProject_ConnectU" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
       <method v="2" />
     </configuration>
   </component>
@@ -156,12 +181,8 @@
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/connect_u_app/consumers.py</url>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/connect_u_app/models.py</url>
-          <line>256</line>
+          <line>274</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

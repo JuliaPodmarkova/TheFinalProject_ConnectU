@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Моя активность | ConnectU{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <h2 class="mb-4">История активности</h2>
+
+    <ul class="nav nav-tabs mb-3" id="activityTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="viewed-tab" data-bs-toggle="tab" data-bs-target="#viewed" type="button" role="tab" aria-controls="viewed" aria-selected="true">Просмотренные профили ({{ viewed_profiles.count }})</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="liked-tab" data-bs-toggle="tab" data-bs-target="#liked" type="button" role="tab" aria-controls="liked" aria-selected="false">Кому я поставил(а) лайк ({{ liked_profiles.count }})</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="disliked-tab" data-bs-toggle="tab" data-bs-target="#disliked" type="button" role="tab" aria-controls="disliked" aria-selected="false">Кому я поставил(а) дизлайк ({{ disliked_profiles.count }})</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="received-tab" data-bs-toggle="tab" data-bs-target="#received" type="button" role="tab" aria-controls="received" aria-selected="false">Кто поставил лайк мне ({{ likes_received.count }})</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="activityTabContent">
+        <div class="tab-pane fade show active" id="viewed" role="tabpanel" aria-labelledby="viewed-tab">
+            {% if viewed_profiles %}
+                <div class="row g-3">
+                    {% for view in viewed_profiles %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <a href="{% url 'profile_view' view.to_user.id %}">
+                                    <img src="{{ view.to_user.profile.get_avatar_url }}" class="card-img-top" style="height: 250px; object-fit: cover;" alt="Фото {{ view.to_user.profile.full_name }}">
+                                </a>
+                                <div class="card-body">
+                                    <h5 class="card-title"><a href="{% url 'profile_view' view.to_user.id %}" class="text-decoration-none text-dark">{{ view.to_user.profile.full_name }}, {{ view.to_user.age }}</a></h5>
+                                    <p class="card-text text-muted">{{ view.to_user.profile.city }}</p>
+                                    <small class="text-muted">Просмотрено: {{ view.timestamp|date:"d M Y" }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">Вы еще не просматривали ни одного профиля.</p>
+            {% endif %}
+        </div>
+
+        <div class="tab-pane fade" id="liked" role="tabpanel" aria-labelledby="liked-tab">
+            {% if liked_profiles %}
+                <div class="row g-3">
+                    {% for like in liked_profiles %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <a href="{% url 'profile_view' like.to_user.id %}">
+                                    <img src="{{ like.to_user.profile.get_avatar_url }}" class="card-img-top" style="height: 250px; object-fit: cover;" alt="Фото {{ like.to_user.profile.full_name }}">
+                                </a>
+                                <div class="card-body">
+                                    <h5 class="card-title"><a href="{% url 'profile_view' like.to_user.id %}" class="text-decoration-none text-dark">{{ like.to_user.profile.full_name }}, {{ like.to_user.age }}</a></h5>
+                                    <p class="card-text text-muted">{{ like.to_user.profile.city }}</p>
+                                    <small class="text-muted">Лайк поставлен: {{ like.created_at|date:"d M Y" }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">Вы еще никому не ставили лайк.</p>
+            {% endif %}
+        </div>
+
+        <div class="tab-pane fade" id="disliked" role="tabpanel" aria-labelledby="disliked-tab">
+            {% if disliked_profiles %}
+                <div class="row g-3">
+                    {% for dislike in disliked_profiles %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <a href="{% url 'profile_view' dislike.to_user.id %}">
+                                    <img src="{{ dislike.to_user.profile.get_avatar_url }}" class="card-img-top" style="height: 250px; object-fit: cover;" alt="Фото {{ dislike.to_user.profile.full_name }}">
+                                </a>
+                                <div class="card-body">
+                                    <h5 class="card-title"><a href="{% url 'profile_view' dislike.to_user.id %}" class="text-decoration-none text-dark">{{ dislike.to_user.profile.full_name }}, {{ dislike.to_user.age }}</a></h5>
+                                    <p class="card-text text-muted">{{ dislike.to_user.profile.city }}</p>
+                                    <small class="text-muted">Дизлайк поставлен: {{ dislike.created_at|date:"d M Y" }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">Вы еще никому не ставили дизлайк.</p>
+            {% endif %}
+        </div>
+
+        <div class="tab-pane fade" id="received" role="tabpanel" aria-labelledby="received-tab">
+            {% if likes_received %}
+                <div class="row g-3">
+                    {% for like in likes_received %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <a href="{% url 'profile_view' like.from_user.id %}">
+                                    <img src="{{ like.from_user.profile.get_avatar_url }}" class="card-img-top" style="height: 250px; object-fit: cover;" alt="Фото {{ like.from_user.profile.full_name }}">
+                                </a>
+                                <div class="card-body">
+                                    <h5 class="card-title"><a href="{% url 'profile_view' like.from_user.id %}" class="text-decoration-none text-dark">{{ like.from_user.profile.full_name }}, {{ like.from_user.age }}</a></h5>
+                                    <p class="card-text text-muted">{{ like.from_user.profile.city }}</p>
+                                    <small class="text-muted">Лайк получен: {{ like.created_at|date:"d M Y" }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">Ваш профиль пока никто не лайкнул. Не переживайте, это скоро изменится!</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

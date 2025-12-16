@@ -20,13 +20,16 @@
             <div class="row g-3">
                 {% for profile in results %}
                     <div class="col-md-6 col-lg-4">
-                        <div class="card h-100 shadow-sm">
-                            <img src="{{ profile.get_avatar_url }}" class="card-img-top" style="height: 250px; object-fit: cover;" alt="Фото {{ profile.full_name }}">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ profile.full_name }}, {{ profile.age }}</h5>
-                                <p class="card-text text-muted">{{ profile.city }}</p>
+                        {# 👇 ВОТ ИСПРАВЛЕНИЕ: Оборачиваем всю карточку в ссылку 👇 #}
+                        <a href="{% url 'profile_view' profile.user.id %}" class="text-decoration-none">
+                            <div class="card h-100 shadow-sm">
+                                <img src="{{ profile.get_avatar_url }}" class="card-img-top" style="height: 250px; object-fit: cover;" alt="Фото {{ profile.full_name }}">
+                                <div class="card-body">
+                                    <h5 class="card-title text-dark">{{ profile.full_name }}, {{ profile.age }}</h5>
+                                    <p class="card-text text-muted">{{ profile.city }}</p>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 {% endfor %}
             </div>

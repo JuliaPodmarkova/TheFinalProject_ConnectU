@@ -10,7 +10,6 @@ from PIL import Image
 from io import BytesIO
 from django.core.files import File
 
-
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -25,32 +24,24 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
-
         if extra_fields.get('is_staff') is not True:
             raise ValueError(_('Superuser must have is_staff=True.'))
         if extra_fields.get('is_superuser') is not True:
             raise ValueError(_('Superuser must have is_superuser=True.'))
-
         return self.create_user(email, password, **extra_fields)
-
 
 class User(AbstractBaseUser, PermissionsMixin):
     GENDER_CHOICES = (('M', 'Мужчина'), ('F', 'Женщина'))
-
     email = models.EmailField(_('email address'), unique=True)
     first_name = models.CharField(_('first name'), max_length=150, blank=True)
     last_name = models.CharField(_('last name'), max_length=150, blank=True)
-
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, verbose_name='Пол', null=True, blank=True)
     birth_date = models.DateField(verbose_name='Дата рождения', null=True, blank=True)
-
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)
-
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
-
     objects = CustomUserManager()
 
     def __str__(self):
@@ -68,7 +59,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     def likes_received_count(self):
         return self.likes_received.count()
 
-
 class Interest(models.Model):
     name = models.CharField(max_length=100, unique=True, verbose_name="Название")
 
@@ -79,7 +69,6 @@ class Interest(models.Model):
         ordering = ['name']
         verbose_name = "Интерес"
         verbose_name_plural = "Интересы"
-
 
 class UserProfile(models.Model):
     STATUS_CHOICES = [
@@ -120,10 +109,8 @@ class UserProfile(models.Model):
         verbose_name = "Профиль"
         verbose_name_plural = "Профили"
 
-
 def user_photos_path(instance, filename):
     return f'user_{instance.user.id}/{filename}'
-
 
 class Photo(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='photos', verbose_name="Пользователь")
@@ -155,7 +142,6 @@ class Photo(models.Model):
         verbose_name = "Фотография"
         verbose_name_plural = "Фотографии"
 
-
 class Like(models.Model):
     from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes_given')
     to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes_received')
@@ -167,7 +153,6 @@ class Like(models.Model):
         verbose_name = "Лайк"
         verbose_name_plural = "Лайки"
 
-
 class Dislike(models.Model):
     from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dislikes_given')
     to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dislikes_received')
@@ -178,7 +163,6 @@ class Dislike(models.Model):
         ordering = ['-created_at']
         verbose_name = "Дизлайк"
         verbose_name_plural = "Дизлайки"
-
 
 class Match(models.Model):
     user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='matches_user1')
@@ -195,7 +179,6 @@ class Match(models.Model):
 
     def __str__(self): return f"Match between {self.user1.email} and {self.user2.email}"
 
-
 class Message(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
@@ -211,7 +194,6 @@ class Message(models.Model):
         local_time = timezone.localtime(self.timestamp)
         return local_time.strftime('%H:%M')
 
-
 class Interaction(models.Model):
     REACTION_CHOICES = (('like', 'Like'), ('dislike', 'Dislike'))
     from_user = models.ForeignKey(User, related_name='interactions_from', on_delete=models.CASCADE)
@@ -226,6 +208,45 @@ class Interaction(models.Model):
 
     def __str__(self): return f'{self.from_user.email} -> {self.to_user.email}: {self.reaction}'
 
+class ProfileView(models.Model):
+    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='viewed_profiles')
+    to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='profile_viewers')
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('from_user', 'to_user')
+        ordering = ['-timestamp']
+        verbose_name = "Просмотр профиля"
+        verbose_name_plural = "Просмотры профилей"
+
+    def __str__(self):
+        return f'{self.from_user.email} viewed {self.to_user.email}'
+
+class Invitation(models.Model):
+    STATUS_CHOICES = [
+        ('sent', 'Отправлено'),
+        ('accepted', 'Принято'),
+        ('declined', 'Отклонено'),
+    ]
+    match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='invitations')
+    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_invitations')
+    to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_invitations')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='sent')
+    message = models.TextField(blank=True, verbose_name="Сообщение-приглашение")
+    contact_info = models.CharField(max_length=255, blank=True, verbose_name="Контактная информация")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Приглашение"
+        verbose_name_plural = "Приглашения"
+        constraints = [
+            models.UniqueConstraint(fields=['match', 'from_user'], condition=Q(status='sent'), name='unique_active_invitation_per_match')
+        ]
+
+    def __str__(self):
+        return f'Invitation from {self.from_user.email} to {self.to_user.email} in match {self.match.id}'
 
 @receiver(post_save, sender=User)
 def create_or_update_user_profile(sender, instance, created, **kwargs):
@@ -235,12 +256,10 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
     if hasattr(instance, 'profile'):
         instance.profile.save()
 
-
 @receiver(post_save, sender=Photo)
 def ensure_single_main_photo(sender, instance, **kwargs):
     if instance.is_main:
         Photo.objects.filter(user=instance.user).exclude(pk=instance.pk).update(is_main=False)
-
 
 @receiver(post_save, sender=Like)
 def sync_like_to_interaction(sender, instance, created, **kwargs):
@@ -249,14 +268,12 @@ def sync_like_to_interaction(sender, instance, created, **kwargs):
         defaults={'reaction': 'like', 'created_at': instance.created_at}
     )
 
-
 @receiver(post_save, sender=Dislike)
 def sync_dislike_to_interaction(sender, instance, created, **kwargs):
     Interaction.objects.update_or_create(
         from_user=instance.from_user, to_user=instance.to_user,
         defaults={'reaction': 'dislike', 'created_at': instance.created_at}
     )
-
 
 @receiver(post_delete, sender=Like)
 @receiver(post_delete, sender=Dislike)

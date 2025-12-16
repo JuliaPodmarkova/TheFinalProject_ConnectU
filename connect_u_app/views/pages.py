@@ -3,13 +3,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from ..models import UserProfile, Interest, User, Like, Dislike, Photo, Match, Message
-from ..forms import UserEditForm, UserProfileEditForm, PhotoForm, UserFilterForm
+from ..models import UserProfile, Interest, User, Like, Dislike, Photo, Match, Message, ProfileView, Invitation
+from ..forms import UserEditForm, PhotoForm, UserFilterForm, ProfileEditForm
 from django.core.paginator import Paginator
 from datetime import date
 
+
 @login_required
-def index(request):
+def home_view(request):
     current_user = request.user
     base_users = User.objects.filter(is_active=True, is_superuser=False, profile__searchable=True).exclude(
         pk=current_user.pk).select_related('profile')
@@ -47,6 +48,23 @@ def index(request):
     }
     return render(request, 'home.html', context)
 
+
+@login_required
+def activity_history_view(request):
+    user = request.user
+    viewed_profiles = ProfileView.objects.filter(from_user=user).select_related('to_user__profile')
+    liked_profiles = Like.objects.filter(from_user=user).select_related('to_user__profile')
+    disliked_profiles = Dislike.objects.filter(from_user=user).select_related('to_user__profile')
+    likes_received = Like.objects.filter(to_user=user).select_related('from_user__profile')
+    context = {
+        'viewed_profiles': viewed_profiles,
+        'liked_profiles': liked_profiles,
+        'disliked_profiles': disliked_profiles,
+        'likes_received': likes_received,
+    }
+    return render(request, 'account/activity_history.html', context)
+
+
 @login_required
 def profile_own_view(request):
     profile = get_object_or_404(UserProfile, user=request.user)
@@ -61,12 +79,13 @@ def profile_own_view(request):
     }
     return render(request, 'account/profile_own.html', context)
 
+
 @login_required
 def profile_edit_view(request):
     profile, created = UserProfile.objects.get_or_create(user=request.user)
     if request.method == 'POST':
         user_form = UserEditForm(request.POST, instance=request.user)
-        profile_form = UserProfileEditForm(request.POST, request.FILES, instance=profile)
+        profile_form = ProfileEditForm(request.POST, request.FILES, instance=profile)
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             saved_profile = profile_form.save(commit=False)
@@ -85,12 +104,13 @@ def profile_edit_view(request):
             messages.error(request, 'Пожалуйста, исправьте ошибки в форме.')
     else:
         user_form = UserEditForm(instance=request.user)
-        profile_form = UserProfileEditForm(instance=profile)
+        profile_form = ProfileEditForm(instance=profile)
     context = {
         'user_form': user_form,
         'profile_form': profile_form
     }
     return render(request, 'account/profile_edit.html', context)
+
 
 @login_required
 def photo_gallery_view(request):
@@ -111,6 +131,7 @@ def photo_gallery_view(request):
     }
     return render(request, 'account/photo_gallery.html', context)
 
+
 @login_required
 def search_view(request):
     query = request.GET.get('q', '')
@@ -119,6 +140,7 @@ def search_view(request):
         results = UserProfile.objects.filter(full_name__icontains=query).exclude(user=request.user)
     context = {'query': query, 'results': results}
     return render(request, 'search.html', context)
+
 
 @login_required
 def match_list_view(request):
@@ -135,6 +157,7 @@ def match_list_view(request):
     context = {'matches': matches_list}
     return render(request, 'matches.html', context)
 
+
 @login_required
 def chat_view(request, match_id):
     match = get_object_or_404(Match, id=match_id)
@@ -142,27 +165,34 @@ def chat_view(request, match_id):
         return HttpResponseForbidden("У вас нет доступа к этому чату.")
     other_user = match.user2 if request.user == match.user1 else match.user1
     messages = match.messages.all().select_related('sender__profile')
+
+    active_invitation = Invitation.objects.filter(match=match, status='sent').first()
+    accepted_invitation = Invitation.objects.filter(match=match, status='accepted').order_by('-updated_at').first()
+
     context = {
         'match': match,
         'other_user': other_user,
-        'messages': messages
+        'messages': messages,
+        'active_invitation': active_invitation,
+        'accepted_invitation': accepted_invitation,
     }
     return render(request, 'chat.html', context)
+
 
 @login_required
 def profile_view(request, user_id):
     if request.user.id == user_id:
         return redirect('profile_own')
-
     viewed_user = get_object_or_404(User, id=user_id)
     profile = get_object_or_404(UserProfile, user=viewed_user)
     is_match = Match.objects.filter(
         (Q(user1=request.user) & Q(user2=viewed_user)) | (Q(user1=viewed_user) & Q(user2=request.user))).exists()
     context = {
-        'profile': profile,
+        'profile_user': viewed_user,  # Передаем объект User, а не Profile
         'is_match': is_match,
     }
     return render(request, 'account/profile_public.html', context)
+
 
 @login_required
 def profile_photos_view(request):

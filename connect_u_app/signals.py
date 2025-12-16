@@ -8,10 +8,8 @@ logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
-    print(f"--- СИГНАЛ СРАБОТАТЬ! Пользователь: {instance.email}, Флаг created: {created} ---")
 
     if created:
-        print(f"--- Флаг created=True. СОЗДАЕМ ПРОФИЛЬ... ---")
         UserProfile.objects.get_or_create(user=instance)
     else:
         print(f"--- Флаг created=False. Профиль не создаем. ---")
@@ -26,5 +24,4 @@ def create_user_profile_on_social_signup(request, user, sociallogin, **kwargs):
         full_name = f"{first_name} {last_name}".strip()
 
         UserProfile.objects.create(user=user, full_name=full_name)
-        logger.info(f"✅ ПРОФИЛЬ: Автоматически создан и заполнен профиль для {user.email} с именем '{full_name}'")
 

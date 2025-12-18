@@ -1,5 +1,3 @@
-# connect_u_app/views/interactions.py
-
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -27,7 +25,6 @@ def show_next_user_view(request):
 
 @login_required
 @require_POST
-# 👇 ИСПРАВЛЕНИЕ TypeError: меняем 'pk' на 'user_id' 👇
 def like_user_view(request, user_id):
     from_user = request.user
     to_user = get_object_or_404(User, id=user_id)
@@ -55,7 +52,6 @@ def like_user_view(request, user_id):
 
 @login_required
 @require_POST
-# 👇 И для единообразия меняем здесь тоже 👇
 def dislike_user_view(request, user_id):
     from_user = request.user
     to_user = get_object_or_404(User, id=user_id)

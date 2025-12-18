@@ -5,19 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1587ceec-4b57-4d39-ad89-7d56d9c39185" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/templates/socialaccount/close_popup.html.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/consumers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/connect_u_app/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/connect_u_app/filters.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/filters.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/connect_u_app/management/commands/seed_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/management/commands/seed_db.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u_app/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connect_u_app/views/actions.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/views/actions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/connect_u_app/views/interactions.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/views/interactions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connect_u_app/views/pages.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/views/pages.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/connect_u_app/views/swipe_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/connect_u_app/views/swipe_views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nginx/default.conf" beforeDir="false" afterPath="$PROJECT_DIR$/nginx/default.conf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/static/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/chat.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/partials/_header.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/partials/_header.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/account/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/partials/user_card.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/partials/user_card.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/socialaccount/close_popup.html.py" beforeDir="false" afterPath="$PROJECT_DIR$/templates/socialaccount/close_popup.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/swipe/main.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/swipe/main.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,6 +52,9 @@
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/docker-compose.yml" root0="FORCE_HIGHLIGHTING" />
   </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 1
 }</component>
@@ -69,6 +74,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "master",
     "last_opened_file_path": "/run/media/juliat/InfoDisk/TheFinalProject_ConnectU",
+    "run.code.analysis.last.selected.profile": "aDefault",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
 }]]></component>
@@ -169,12 +175,16 @@
           <option name="timeStamp" value="6" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/connect_u_app/filters.py</url>
-          <option name="timeStamp" value="10" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/connect_u_app/routing.py</url>
           <option name="timeStamp" value="11" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/connect_u_app/views/auth_views.py</url>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/connect_u_app/signals.py</url>
+          <option name="timeStamp" value="15" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

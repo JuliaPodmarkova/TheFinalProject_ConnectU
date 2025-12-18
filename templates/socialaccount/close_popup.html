@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аутентификация...</title>
+    <script>
+        setTimeout(function() {
+            window.location.href = '/';
+        }, 10000);
+
+        try {
+            window.opener.location.reload(true);
+        } catch (e) {
+            console.error(e);
+        }
+    </script>
+</head>
+<body>
+    <p>Вход выполнен. Это окно закроется через 10 секунд и вы будете перенаправлены на главную страницу.</p>
+    <p>Если это не произошло, <a href="/" onclick="window.close();">нажмите сюда</a>.</p>
+</body>
+</html>

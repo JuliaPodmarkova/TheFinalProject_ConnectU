@@ -16,11 +16,9 @@ class UserProfileFilter(filters.FilterSet):
         today = timezone.now().date()
 
         if name == 'min_age':
-            # People born before or on this year
             birth_year = today.year - int(value)
             return queryset.filter(user__birth_date__year__lte=birth_year)
         if name == 'max_age':
-            # People born after or on this year
             birth_year = today.year - int(value)
             return queryset.filter(user__birth_date__year__gte=birth_year)
         return queryset

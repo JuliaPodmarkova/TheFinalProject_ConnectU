@@ -97,7 +97,6 @@ class Command(BaseCommand):
         processed_pairs = set()
         for from_user_id, to_user_id in tqdm(all_likes_set):
             if (to_user_id, from_user_id) in all_likes_set:
-                # To avoid creating duplicate matches (A,B) and (B,A)
                 pair = tuple(sorted((from_user_id, to_user_id)))
                 if pair not in processed_pairs:
                     user1_id, user2_id = pair

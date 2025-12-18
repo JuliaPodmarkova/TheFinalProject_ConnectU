@@ -7,7 +7,6 @@ import json
 from datetime import date, timedelta
 
 def get_next_user_for_swipe(current_user):
-    """Возвращает следующего пользователя для свайпа."""
     liked_ids = Like.objects.filter(from_user=current_user).values_list('to_user_id', flat=True)
     disliked_ids = Dislike.objects.filter(from_user=current_user).values_list('to_user_id', flat=True)
     excluded_ids = set(liked_ids) | set(disliked_ids)
@@ -26,12 +25,10 @@ def get_next_user_for_swipe(current_user):
 
 @login_required
 def swipe_main_view(request):
-    """Отображает основную страницу для свайпов (контейнер)."""
     return render(request, 'swipe/main.html')
 
 @login_required
 def get_next_profile(request):
-    """HTMX-эндпоинт для получения карточки следующего пользователя."""
     next_user = get_next_user_for_swipe(request.user)
     if next_user:
         return render(request, 'swipe/card.html', {'profile_user': next_user})
@@ -42,8 +39,6 @@ def get_next_profile(request):
 @login_required
 @require_POST
 def swipe(request):
-    """Обрабатывает лайк или дизлайк и возвращает следующую карточку."""
-    # ИСПРАВЛЕНИЕ: HTMX с hx-vals отправляет данные в request.POST, а не в request.body
     user_id = request.POST.get('user_id')
     action = request.POST.get('action')
 

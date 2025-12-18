@@ -23,7 +23,7 @@ h1, h2, h3, h4, h5, h6 {
 /* --- Шапка (Navbar) --- */
 .main-header {
   background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Добавим легкую тень для глубины */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .navbar-brand {
@@ -58,7 +58,7 @@ h1, h2, h3, h4, h5, h6 {
     padding: 0.6rem 1.2rem;
 }
 .btn-primary:hover {
-    background-color: #3b87f8; /* Чуть темнее при наведении */
+    background-color: #3b87f8;
     border-color: #3b87f8;
 }
 
@@ -78,7 +78,7 @@ h1, h2, h3, h4, h5, h6 {
 .card {
     border: none;
     border-radius: 1rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Более мягкая тень по умолчанию */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 /* --- Формы (Forms) --- */

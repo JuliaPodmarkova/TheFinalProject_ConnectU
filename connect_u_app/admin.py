@@ -14,8 +14,8 @@ class UserProfileInline(admin.StackedInline):
 class CustomUserAdmin(BaseUserAdmin):
     inlines = (UserProfileInline,)
     list_display = ('email', 'first_name', 'last_name', 'gender', 'is_staff')
-    search_fields = ('email', 'first_name', 'last_name')  # Ищем по email вместо username
-    ordering = ['email']  # Сортируем по email
+    search_fields = ('email', 'first_name', 'last_name')
+    ordering = ['email']
 
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
@@ -31,8 +31,6 @@ class CustomUserAdmin(BaseUserAdmin):
         }),
     )
 
-
-# Перерегистрация стандартной модели User
 if admin.site.is_registered(User):
     admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
@@ -41,7 +39,7 @@ admin.site.register(User, CustomUserAdmin)
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'full_name', 'city', 'searchable')
-    search_fields = ('user__email', 'user__first_name', 'user__last_name', 'city')  # Ищем по email пользователя
+    search_fields = ('user__email', 'user__first_name', 'user__last_name', 'city')
 
 
 @admin.register(Photo)

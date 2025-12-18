@@ -216,8 +216,5 @@ def profile_photos_view(request):
     return render(request, 'account/profile_photos.html', context)
 
 def close_popup_view(request):
-    """
-    Этот view просто рендерит шаблон, который закроет pop-up окно
-    и перезагрузит родительскую страницу.
-    """
+
     return render(request, 'socialaccount/close_popup.html')
